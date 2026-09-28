@@ -4,6 +4,7 @@ import {
   createDelivery,
   type Detection,
   type Detector,
+  type PartSummary,
   parseGenerationId,
   parseRouting,
   summarizeUsage,
@@ -18,7 +19,14 @@ import {
   type RetryInfo,
   type SkipReason,
 } from './records'
-import type { CallOptions, GenerateResult, Middleware, Model, Usage } from './types'
+import type { CallOptions, GenerateResult, Middleware, Model, StreamPart, Usage } from './types'
+
+type FinishPart = Extract<StreamPart, { type: 'finish' }>
+type Reader = ReadableStreamDefaultReader<StreamPart>
+
+// ponytail: fixed cap on part summaries per attempt (first 399 parts + finish). Long answers lose
+// the middle of their Studio timeline; bucket parts by time if that ever matters.
+const MAX_PARTS = 400
 
 export type GuardOptions = {
   /** Default: `['billedButEmpty']`. */
@@ -189,6 +197,56 @@ export function guard(options: GuardOptions = {}): Middleware {
     return complete(begun, summary, generationId)
   }
 
+  /** Watches one streamed attempt: counts, part types, and timings. Never content. */
+  function observeStream(begun: ReturnType<typeof start>, model: Model, params: CallOptions) {
+    const delivery = createDelivery(trimWhitespace)
+    const parts: PartSummary[] = []
+    let earlierMetadata: unknown
+    let responseId: string | undefined
+    return {
+      observe(part: StreamPart) {
+        if (part.type !== 'raw' && (parts.length < MAX_PARTS - 1 || part.type === 'finish')) {
+          parts.push({ type: part.type, atMs: Math.round(performance.now() - begun.t0) })
+        }
+        if (part.type === 'text-delta') delivery.text(part.delta)
+        else if (part.type === 'reasoning-delta') delivery.reasoning(part.delta)
+        else if (part.type === 'tool-call') delivery.toolCall()
+        else if (part.type === 'response-metadata') responseId ??= part.id
+        if (
+          part.type !== 'finish' &&
+          'providerMetadata' in part &&
+          part.providerMetadata?.gateway
+        ) {
+          earlierMetadata = part.providerMetadata
+        }
+      },
+      complete(finish: FinishPart): Attempt {
+        const summary: CallSummary = {
+          modelId: model.modelId,
+          mode: 'stream',
+          finishReason: finish.finishReason.unified,
+          usage: summarizeUsage(finish.usage),
+          delivered: delivery.result(),
+          reasoningRequested: params.reasoning,
+          // The finish part first, then any earlier part carrying gateway metadata.
+          routing: parseRouting(finish.providerMetadata) ?? parseRouting(earlierMetadata),
+          parts,
+        }
+        const generationId =
+          parseGenerationId(finish.providerMetadata) ??
+          parseGenerationId(earlierMetadata) ??
+          responseId
+        return complete(begun, summary, generationId)
+      },
+    }
+  }
+
+  /** Attempt 2 joins a stream already in progress: drop its preamble and (by default) reasoning. */
+  const forwardFromRetry = (part: StreamPart) =>
+    part.type !== 'stream-start' &&
+    part.type !== 'response-metadata' &&
+    (options.retry?.reasoning === 'keep' || !part.type.startsWith('reasoning'))
+
   /** PRD §5.1 retry semantics: candidates, exclusions, and every "never retry" rule. */
   async function planRetry(
     caught: Attempt,
@@ -314,7 +372,123 @@ export function guard(options: GuardOptions = {}): Middleware {
         },
       }
     },
+
+    async wrapStream({ doStream, params, model }) {
+      warnIfNativeExclude(params)
+      const first = start()
+      const result = await doStream()
+      const readers: Reader[] = []
+      const state = { cancelled: false }
+
+      async function* guarded(): AsyncGenerator<StreamPart> {
+        const attempt1 = observeStream(first, model, params)
+        let held: { finish: FinishPart; caught: Attempt } | undefined
+        for await (const part of readParts(result.stream, readers)) {
+          if (held) continue // a caught attempt ends at its finish part
+          attempt1.observe(part)
+          if (part.type !== 'finish') {
+            yield part // pass-through, never buffered
+            continue
+          }
+          const caught = attempt1.complete(part)
+          if (caught.detections.length > 0) {
+            held = { finish: part, caught } // only a caught finish is held back
+            continue
+          }
+          // Healthy: decided synchronously on the finish part and released at once.
+          write(toRecord(caught, null, null))
+          yield part
+        }
+        if (!held) return
+        const { finish, caught } = held
+
+        const plan: Awaited<ReturnType<typeof planRetry>> = state.cancelled
+          ? { skip: 'aborted' }
+          : await planRetry(caught, params, model)
+        if ('skip' in plan) {
+          settle(caught, skipped(plan.skip))
+          yield finish
+          return
+        }
+
+        const second = start()
+        const attempt2 = observeStream(second, model, plan.params)
+        let retryStream: ReadableStream<StreamPart> | undefined
+        let finish2: FinishPart | undefined
+        try {
+          retryStream = (await model.doStream(plan.params)).stream
+          for await (const part of readParts(retryStream, readers)) {
+            if (part.type === 'error') throw part.error
+            attempt2.observe(part)
+            if (part.type === 'finish') finish2 = part
+            else if (forwardFromRetry(part)) yield part
+          }
+          if (state.cancelled) throw new Error('The stream was cancelled during the retry.')
+          if (!finish2) throw new Error('The retry stream ended without a finish part.')
+        } catch (error) {
+          retryStream?.cancel().catch(() => {})
+          // Never worse than without provider-guard: end with the original finish part.
+          settle(caught, failed, undefined, error)
+          yield finish
+          return
+        }
+        const retried = attempt2.complete(finish2)
+        settle(caught, outcomeOf(retried), retried)
+        yield {
+          ...finish2,
+          usage: addUsage(finish.usage, finish2.usage),
+          providerMetadata: {
+            ...finish2.providerMetadata,
+            providerGuard: guardMetadata(caught, retried),
+          },
+        }
+      }
+
+      return { ...result, stream: toReadable(guarded(), readers, state) }
+    },
   }
+}
+
+async function* readParts(stream: ReadableStream<StreamPart>, readers: Reader[]) {
+  const reader = stream.getReader()
+  readers.push(reader)
+  try {
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) return
+      yield value
+    }
+  } finally {
+    reader.releaseLock()
+  }
+}
+
+/** Pull-based with no queue (highWaterMark 0): a part is read only when the consumer asks. */
+function toReadable(
+  parts: AsyncGenerator<StreamPart>,
+  readers: Reader[],
+  state: { cancelled: boolean },
+): ReadableStream<StreamPart> {
+  return new ReadableStream<StreamPart>(
+    {
+      async pull(controller) {
+        try {
+          const { done, value } = await parts.next()
+          if (state.cancelled) return
+          if (done) controller.close()
+          else controller.enqueue(value)
+        } catch (error) {
+          if (!state.cancelled) controller.error(error)
+        }
+      },
+      async cancel(reason) {
+        state.cancelled = true
+        await Promise.allSettled(readers.map((r) => r.cancel(reason)))
+        parts.return(undefined).catch(() => {})
+      },
+    },
+    { highWaterMark: 0 },
+  )
 }
 
 function warnIfNativeExclude(params: CallOptions): void {
