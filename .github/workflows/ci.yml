@@ -30,13 +30,18 @@ jobs:
       - run: pnpm typecheck
       - name: Test
         shell: bash
+        env:
+          DEBUG_PRINT_LIMIT: '300'
         run: |
           set -o pipefail
           pnpm test 2>&1 | tee test-output.txt
-      - name: Annotate the end of the test output on failure
+      - name: Annotate failing tests
         if: failure()
         shell: bash
-        run: tail -n 40 test-output.txt | sed 's/\x1b\[[0-9;]*m//g' | sed 's/^/::error title=pnpm test::/' || true
+        run: |
+          sed 's/\x1b\[[0-9;]*m//g' test-output.txt \
+            | grep -E "FAIL|×|✗|Error|expected|Unable to|Timed out|threshold" \
+            | head -n 40 | sed 's/^/::error title=pnpm test::/' || true
       - run: pnpm build
       - name: Pack, install the tarball in a temp project, run provider-guard --version
         run: pnpm exec tsx scripts/smoke-pack.ts
