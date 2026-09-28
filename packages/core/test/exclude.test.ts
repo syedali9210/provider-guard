@@ -202,7 +202,7 @@ describe('exclude()', () => {
   })
 
   test('uses baseURL, and caches per base URL', async () => {
-    const fetch = vi.fn(json(endpoints('a', 'b')))
+    const fetch = vi.fn<typeof globalThis.fetch>(json(endpoints('a', 'b')))
     await exclude(MODEL, ['a'], { fetch, baseURL: 'https://gateway.example.test/' })
     await exclude(MODEL, ['a'], { fetch })
     expect(fetch.mock.calls.map((c) => c[0])).toEqual([
