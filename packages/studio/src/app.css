@@ -772,6 +772,19 @@ code {
     padding-right: 16px;
   }
 }
+/* Phones: drop the time, tighten the cells, and let the result wrap so it stays in view. */
+@media (max-width: 480px) {
+  .table th,
+  .table td {
+    padding: 0 8px;
+  }
+  .table .col-time {
+    display: none;
+  }
+  .table .col-result {
+    white-space: normal;
+  }
+}
 
 /* ---------------------------------------------------------------------- chips and results */
 
@@ -1260,5 +1273,19 @@ code {
   .model-item {
     width: auto;
     white-space: nowrap;
+  }
+}
+/* Phones: keep the provider, calls, empty rate, and verdicts in view; the plot shows reasoning. */
+@media (max-width: 480px) {
+  .providers-table .col-reasoning,
+  .rate-bar {
+    display: none;
+  }
+  .outlier {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .effort-flag {
+    white-space: normal;
   }
 }

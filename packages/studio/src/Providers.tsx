@@ -43,10 +43,10 @@ function ProviderTable({ model }: { model: ModelReport }) {
             Calls
           </th>
           <th scope="col">Empty</th>
-          <th scope="col" className="num">
+          <th scope="col" className="num col-reasoning">
             Reasoned
           </th>
-          <th scope="col" className="num" title="Median reasoning tokens">
+          <th scope="col" className="num col-reasoning" title="Median reasoning tokens">
             Median Reasoning
           </th>
           <th scope="col">
@@ -64,8 +64,8 @@ function ProviderTable({ model }: { model: ModelReport }) {
             <td>
               <EmptyRate empty={p.empty} rate={p.emptyRate} outlier={p.outlier} />
             </td>
-            <td className="num text-label-13-mono">{pct(p.reasonedRate)}</td>
-            <td className="num text-label-13-mono">{num(p.medianReasoningTokens)}</td>
+            <td className="num col-reasoning text-label-13-mono">{pct(p.reasonedRate)}</td>
+            <td className="num col-reasoning text-label-13-mono">{num(p.medianReasoningTokens)}</td>
             <td>
               {p.outlier && p.p !== null && (
                 <span className="outlier">
@@ -104,8 +104,10 @@ export function DotPlot({ panel }: { panel: ReasoningPanel }) {
   const rowHeight = 36
   const H = panel.rows.length * rowHeight + 28
   const step = 10 ** Math.floor(Math.log10(max / 2))
+  // Skip ticks until labels sit at least 56px apart, so they never overlap on a phone.
+  const stride = Math.ceil(56 / ((step / max) * plot))
   const ticks = Array.from({ length: Math.floor(max / step) + 1 }, (_, i) => i * step).filter(
-    (_, i, all) => all.length <= 8 || i % 2 === 0,
+    (_, i) => i % stride === 0,
   )
   const summary = panel.rows
     .map(

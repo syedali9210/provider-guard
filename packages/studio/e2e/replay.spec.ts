@@ -53,7 +53,7 @@ test('the replay demo has no console errors', async ({ page }) => {
   expect(errors).toEqual([])
 })
 
-for (const width of [1280, 1024, 800]) {
+for (const width of [1280, 1024, 800, 375]) {
   test(`the Feed fits a ${width}px window without scrolling sideways`, async ({ page }) => {
     await page.setViewportSize({ width, height: 800 })
     await page.goto('/')
@@ -66,3 +66,20 @@ for (const width of [1280, 1024, 800]) {
     expect(overflow).toBeLessThanOrEqual(0)
   })
 }
+
+test('Providers fits a 375px phone without scrolling sideways', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 })
+  await page.goto('/')
+  await page.getByRole('tab', { name: 'Providers' }).click()
+  for (const [button, heading] of [
+    [/^zai\/glm-5\.3-flash/, 'zai/glm-5.3-flash'],
+    [/^openai\/gpt-5\.6-sol/, 'openai/gpt-5.6-sol'],
+  ] as const) {
+    await page.getByRole('button', { name: button }).click()
+    await expect(page.getByRole('heading', { name: heading })).toBeVisible()
+    const overflow = await page
+      .locator('.providers-section')
+      .evaluateAll((els) => Math.max(...els.map((el) => el.scrollWidth - el.clientWidth)))
+    expect(overflow).toBeLessThanOrEqual(0)
+  }
+})
