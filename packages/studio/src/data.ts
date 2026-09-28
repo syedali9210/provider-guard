@@ -156,6 +156,7 @@ function useLive(file: string | null, range: Range): Source {
     return () => events.close()
   }, [file, add])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `attempt` is the reload trigger
   useEffect(() => {
     if (file === null) return
     let cancelled = false
@@ -255,8 +256,11 @@ export function planReplay(datasets: Record<string, CallRecord[]>): {
   // Each history group gets a position in [0, 1) within its dataset, so datasets interleave.
   const history: Array<{ group: Group; position: number }> = []
   const live: Group[] = []
-  const place = (groups: Group[]) =>
-    groups.forEach((group, i) => history.push({ group, position: (i + 0.5) / groups.length }))
+  const place = (groups: Group[]) => {
+    for (const [i, group] of groups.entries()) {
+      history.push({ group, position: (i + 0.5) / groups.length })
+    }
+  }
   for (const [id, records] of Object.entries(datasets)) {
     const groups = groupsOf(records)
     if (id !== 'vercel-ai-20932') {
@@ -312,6 +316,7 @@ function useReplay(dataset: string | null): Source {
   }, [dataset])
 
   // Start (or restart): lay history out over the last few minutes, then play the rest.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `run` is the restart trigger
   useEffect(() => {
     if (!plan) return
     const now = Date.now()

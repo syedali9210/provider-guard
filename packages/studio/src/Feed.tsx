@@ -120,7 +120,7 @@ export function ResultLabel({ call }: { call: Call }) {
 
 function FeedSkeleton() {
   return (
-    <div className="feed-loading" aria-busy="true" aria-label="Loading calls">
+    <div className="feed-loading" role="status" aria-busy="true" aria-label="Loading calls">
       {Array.from({ length: 8 }, (_, i) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: static placeholder rows
         <div key={i} className="feed-skeleton-row">
@@ -302,6 +302,7 @@ export function Feed({
       <div className="sr-only" aria-live="polite">
         {announcement}
       </div>
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: hover and focus only pause updates; the rows are the controls */}
       <div
         ref={scrollRef}
         className="feed-scroll"
@@ -349,6 +350,7 @@ export function Feed({
           </thead>
           <tbody>
             {first > 0 && (
+              // biome-ignore lint/a11y/noAriaHiddenOnFocusable: a spacer holding virtualized height; no cells, never focusable
               <tr
                 aria-hidden="true"
                 style={{ height: first * ROW_HEIGHT }}
@@ -401,6 +403,7 @@ export function Feed({
               )
             })}
             {last < shown.length && (
+              // biome-ignore lint/a11y/noAriaHiddenOnFocusable: a spacer holding virtualized height; no cells, never focusable
               <tr
                 aria-hidden="true"
                 style={{ height: (shown.length - last) * ROW_HEIGHT }}

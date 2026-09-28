@@ -647,15 +647,16 @@ code {
   white-space: nowrap;
   box-shadow: inset 0 -1px var(--ds-gray-alpha-400);
 }
+/* Same specificity as the rule above and later, so it wins without climbing specificity. */
+.providers-table th,
+.providers-table td {
+  padding: 0 10px;
+}
 .table thead th {
   height: 40px;
   color: var(--ds-gray-900);
   font: var(--font-weight-medium) 13px / 16px var(--font-geist-sans);
   white-space: normal;
-}
-.providers-table th,
-.providers-table td {
-  padding: 0 10px;
 }
 .table tbody th {
   font-weight: var(--font-weight-normal);
@@ -717,10 +718,6 @@ code {
     inset -2px 2px var(--ds-focus-color),
     inset 0 -2px var(--ds-focus-color);
 }
-.spacer-row td,
-.spacer-row {
-  box-shadow: none;
-}
 .col-time {
   width: 96px;
   color: var(--ds-gray-900);
@@ -730,10 +727,10 @@ code {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.col-tokens,
-.col-duration {
+.table .col-tokens,
+.table .col-duration {
   width: 96px;
-  text-align: right !important;
+  text-align: right;
   color: var(--ds-gray-900);
 }
 .feed-loading {
@@ -884,9 +881,13 @@ code {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .catching *,
+  .catching .chip-flag,
+  .catching .catch-line path:first-child,
+  .catching .catch-line path:last-child,
+  .catching .chip-retry,
+  .catching .result-check,
   .skeleton {
-    animation: none !important;
+    animation: none;
   }
 }
 

@@ -66,9 +66,8 @@ async function subscribe(url: string) {
   cleanups.push(() => controller.abort())
   const res = await fetch(`${url}/api/stream`, { signal: controller.signal })
   expect(res.headers.get('content-type')).toBe('text/event-stream; charset=utf-8')
-  const reader = (res.body as ReadableStream<Uint8Array>)
-    .pipeThrough(new TextDecoderStream())
-    .getReader()
+  const reader = (res.body as ReadableStream<Uint8Array>).getReader()
+  const decoder = new TextDecoder()
   let buffer = ''
   return async function next(timeoutMs = 3000): Promise<CallRecord> {
     const deadline = Date.now() + timeoutMs
@@ -89,7 +88,7 @@ async function subscribe(url: string) {
         ),
       ])
       if (chunk.done) throw new Error('SSE stream ended')
-      buffer += chunk.value
+      buffer += decoder.decode(chunk.value, { stream: true })
     }
   }
 }
