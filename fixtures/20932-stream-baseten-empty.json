@@ -1,0 +1,32 @@
+{
+  "source": "Reconstructed from the chunk shape published in vercel/ai#20932 as AI SDK V4 stream parts. Not a live recording: no gateway credits were used. Routing metadata uses the field names quoted in vercel/ai#20932 and #20934.",
+  "parts": [
+    { "type": "stream-start", "warnings": [] },
+    { "type": "response-metadata", "id": "gen_01K6A1B2C3D4E5F6G7H8J9K0AB", "modelId": "zai/glm-5.3-flash" },
+    { "type": "reasoning-start", "id": "reasoning-0" },
+    { "type": "reasoning-delta", "id": "reasoning-0", "delta": "Ok" },
+    { "type": "reasoning-delta", "id": "reasoning-0", "delta": ", " },
+    { "type": "reasoning-end", "id": "reasoning-0" },
+    {
+      "type": "finish",
+      "finishReason": { "unified": "stop", "raw": "stop" },
+      "usage": {
+        "inputTokens": { "total": 1830, "noCache": 1830, "cacheRead": 0, "cacheWrite": 0 },
+        "outputTokens": { "total": 6, "text": 4, "reasoning": 2 }
+      },
+      "providerMetadata": {
+        "gateway": {
+          "generationId": "gen_01K6A1B2C3D4E5F6G7H8J9K0AB",
+          "routing": {
+            "originalModelId": "zai/glm-5.3-flash",
+            "resolvedProvider": "baseten",
+            "finalProvider": "baseten",
+            "fallbacksAvailable": ["baseten", "zai", "fireworks"],
+            "modelAttemptCount": 1,
+            "planningReasoning": "System credentials planned for: baseten, zai, fireworks"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "source": "Reconstructed from vercel/ai#20932: a successful attempt has the same shape as the empty one plus one text part before finish. Not a live recording.",
+  "parts": [
+    { "type": "stream-start", "warnings": [] },
+    { "type": "response-metadata", "id": "gen_01K6A1B2C3D4E5F6G7H8J9K0CD", "modelId": "zai/glm-5.3-flash" },
+    { "type": "reasoning-start", "id": "reasoning-0" },
+    { "type": "reasoning-delta", "id": "reasoning-0", "delta": "Ok" },
+    { "type": "reasoning-delta", "id": "reasoning-0", "delta": ", " },
+    { "type": "reasoning-end", "id": "reasoning-0" },
+    { "type": "text-start", "id": "text-0" },
+    { "type": "text-delta", "id": "text-0", "delta": "Done." },
+    { "type": "text-end", "id": "text-0" },
+    {
+      "type": "finish",
+      "finishReason": { "unified": "stop", "raw": "stop" },
+      "usage": {
+        "inputTokens": { "total": 1830, "noCache": 1830, "cacheRead": 0, "cacheWrite": 0 },
+        "outputTokens": { "total": 6, "text": 4, "reasoning": 2 }
+      },
+      "providerMetadata": {
+        "gateway": {
+          "generationId": "gen_01K6A1B2C3D4E5F6G7H8J9K0CD",
+          "routing": {
+            "originalModelId": "zai/glm-5.3-flash",
+            "resolvedProvider": "zai",
+            "finalProvider": "zai",
+            "fallbacksAvailable": ["zai", "fireworks"],
+            "modelAttemptCount": 1
+          }
+        }
+      }
+    }
+  ]
+}

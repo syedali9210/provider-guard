@@ -1,0 +1,25 @@
+{
+  "source": "Non-streaming counterpart of 20932-stream-baseten-empty.json as an AI SDK V4 generate result. Not a live recording.",
+  "result": {
+    "content": [{ "type": "reasoning", "text": "Ok, " }],
+    "finishReason": { "unified": "stop", "raw": "stop" },
+    "usage": {
+      "inputTokens": { "total": 1830, "noCache": 1830, "cacheRead": 0, "cacheWrite": 0 },
+      "outputTokens": { "total": 6, "text": 4, "reasoning": 2 }
+    },
+    "providerMetadata": {
+      "gateway": {
+        "generationId": "gen_01K6A1B2C3D4E5F6G7H8J9K0EF",
+        "routing": {
+          "originalModelId": "zai/glm-5.3-flash",
+          "resolvedProvider": "baseten",
+          "finalProvider": "baseten",
+          "fallbacksAvailable": ["baseten", "zai", "fireworks"],
+          "modelAttemptCount": 1
+        }
+      }
+    },
+    "response": { "id": "gen_01K6A1B2C3D4E5F6G7H8J9K0EF", "modelId": "zai/glm-5.3-flash" },
+    "warnings": []
+  }
+}
