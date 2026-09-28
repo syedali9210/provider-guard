@@ -1,18 +1,26 @@
 import { defineConfig } from 'tsup'
 
+// tsup's dts worker sets `baseUrl`, which TypeScript 6 rejects as deprecated (see NOTES.md).
+const dts = { compilerOptions: { ignoreDeprecations: '6.0' } }
+
 export default defineConfig([
   {
-    // Edge-safe library entries: no static node:* imports allowed here.
-    entry: { index: 'src/index.ts', node: 'src/node.ts' },
+    // Edge-safe: no static node:* imports may reach this entry.
+    entry: { index: 'src/index.ts' },
     format: ['esm', 'cjs'],
-    // tsup's dts worker sets `baseUrl`, which TypeScript 6 rejects as deprecated (see NOTES.md).
-    dts: { compilerOptions: { ignoreDeprecations: '6.0' } },
-    clean: true,
+    dts,
     target: 'node22',
     platform: 'neutral',
   },
   {
-    entry: { cli: 'src/cli.ts' },
+    entry: { node: 'src/node.ts' },
+    format: ['esm', 'cjs'],
+    dts,
+    target: 'node22',
+    platform: 'node',
+  },
+  {
+    entry: { cli: 'src/bin.ts' },
     format: ['esm'],
     target: 'node22',
     platform: 'node',

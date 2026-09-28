@@ -43,3 +43,29 @@ Decisions and discrepancies found while building v0.1. Newest findings are appen
 - One call to the public, unauthenticated endpoints API on 2026-09-28: `GET https://ai-gateway.vercel.sh/v1/models/zai/glm-5.3-flash/endpoints` → 200, 19 providers, slugs at `data.endpoints[].provider_name`. Saved as `fixtures/endpoints-zai-glm-5.3-flash.json`.
 - No AI Gateway endpoint that needs an API key was called.
 - **Biome 2.5.** `rules.recommended` is deprecated in favor of `rules.preset`. `biome migrate --write` rewrote `recommended: true` as `preset: "none"`, which disables every rule; it was corrected by hand to `preset: "recommended"`.
+
+## M1–M4 — core decisions (2026-09-28)
+
+### guard()
+- **Routing metadata was not recorded live.** A live recording needs an AI Gateway API key, which the PRD rules out. The fixtures in `fixtures/20932-*.json` are built from the chunk shapes and field names quoted in vercel/ai#20932 and #20934 (`providerMetadata.gateway.routing.{finalProvider, fallbacksAvailable, …}` on the `finish` part). The parser also accepts routing from any earlier part that carries `providerMetadata.gateway`. `fallbacksAvailable` is assumed to be a string array. **Open item:** confirm the location and shape with one real recording (see `scripts/live-repro.ts`), then replace the fixtures.
+- "Served through AI Gateway" means `model.provider === 'gateway'` (the value `GatewayLanguageModel` always reports).
+- **Skip reasons.** The PRD names `no-alternative-provider`. The other "never retry" rules also record `outcome: 'skipped'`, each with its own reason: `tool-call-emitted`, `aborted`, `retry-disabled`, `unknown-provider`, `not-gateway`, `provider-list-unavailable`, and `report-only` (a detector that returns `retry: false`).
+- `providerMetadata.providerGuard` is attached only when a retry produced the result (`recovered` or `still-empty`). When the retry is skipped or fails, the caller gets the original result unchanged.
+- `retry.reasoning` applies to streams. In `generateText`, nothing has reached the caller yet, so the retry's full content, including its reasoning, is returned.
+- **Records.** One record per *completed* attempt. An attempt that errors or is aborted before its `finish` part writes nothing, the same as without provider-guard. The caught attempt is written after its retry settles, so its `retry.outcome` is final, followed by the retry's record (`retryOf`).
+- **`parts` cap.** At most 400 part summaries per attempt (the first 399 plus `finish`); `raw` parts are never recorded. Marked with a `ponytail:` comment in `guard.ts`.
+- **Stream mechanics.** The guarded stream is pull-based with `highWaterMark: 0`, so a part is read from the provider only when the consumer asks for it. Cancelling the guarded stream cancels the provider stream and never starts a retry. A retry stream that throws, emits an `error` part, or ends without `finish` is a failed retry: the stream ends with the original `finish` and no error reaches the caller.
+- **Default sink.** The main entry must load in Edge runtimes, so it cannot import `node:fs`. The default file sink gets `fs` and `path` from `process.getBuiltinModule` (Node ≥ 22.3) and falls back to a memory sink when that does not exist. `provider-guard/node` exports `fileSink` with static imports. The file sink serializes appends within a process.
+
+### exclude()
+- After a failed fetch, the cache waits 30 seconds before fetching that model's list again, so a down endpoints API is not hit on every request. The last known list, or `{}` with `allow-all`, is used in the meantime.
+- An empty `endpoints` array is treated as unavailable.
+
+### Report and CLI
+- "caught" is any detector flag. "empty" is the `billed-but-empty` flag. "reasoned" is `reasoningChars > 0` or reasoning tokens > 0. Records without a provider are grouped as `unknown`.
+- Effort rule: a provider is flat when `(max − min) / min < 25%` between its medians at the lowest and highest requested levels, and responsive when `max / min ≥ 2`. Zero at both levels counts as flat, and `0 → n` counts as responsive. `provider-default` is not an ordered level and is ignored.
+- p-values are rounded to 12 significant digits so float noise (for example 0.99999999999998) never shows up in JSON.
+- `--no-open` is declared as its own flag because `parseArgs({ allowNegative })` needs Node 22.4 and engines allow 22.0.
+- Colors follow Node's precedence: `FORCE_COLOR` (unless `0`/`false`) wins over `NO_COLOR`, then TTY detection and `TERM=dumb`.
+- The replay dataset (`scripts/build-replay.ts`) was built in M4 rather than M7 because M4's acceptance runs the report against it.
+- `__snapshots__` are excluded from Biome; formatting them breaks byte-exact file snapshots.

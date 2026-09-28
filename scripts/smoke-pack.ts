@@ -37,6 +37,12 @@ try {
   if (out !== version) throw new Error(`expected --version to print ${version}, got "${out}"`)
   run(process.execPath, ['esm.mjs'], app)
   run(process.execPath, ['cjs.cjs'], app)
+
+  // The main entry must stay loadable in Edge runtimes: no static imports or requires at all.
+  for (const file of ['index.js', 'index.cjs']) {
+    const code = readFileSync(join(app, 'node_modules', 'provider-guard', 'dist', file), 'utf8')
+    if (/^import\s|require\(/m.test(code)) throw new Error(`dist/${file} imports a module`)
+  }
   console.log(`smoke ok: provider-guard@${version}`)
 } finally {
   rmSync(tmp, { recursive: true, force: true })

@@ -1,0 +1,332 @@
+{
+ "id": "vercel-ai-21207",
+ "title": "openai/gpt-5.6-sol: reasoning effort dropped on Bedrock",
+ "issue": "https://github.com/vercel/ai/issues/21207",
+ "note": "Reconstructed from data published in the linked issue. Counts, token shapes, and reasoning token values match the issue; timing, input sizes, and answer lengths are synthetic. No live traffic.",
+ "records": [
+  {
+   "v": 1,
+   "id": "pg_01M2ZHW9K8J9TJG0XWKHDNXZRJ",
+   "retryOf": null,
+   "ts": "2026-09-20T14:00:19.304Z",
+   "model": "openai/gpt-5.6-sol",
+   "provider": "bedrock",
+   "mode": "generate",
+   "finish": "stop",
+   "tokens": {
+    "in": 5870,
+    "out": 3585,
+    "text": 282,
+    "reasoning": 3303
+   },
+   "delivered": {
+    "textChars": 1128,
+    "reasoningChars": 0,
+    "toolCalls": 0
+   },
+   "reasoningRequested": "low",
+   "flags": [],
+   "retry": null,
+   "parts": null,
+   "generationId": null,
+   "durationMs": 32754
+  },
+  {
+   "v": 1,
+   "id": "pg_01M2ZHWVM9ZH3K6A3F0W2VKBBD",
+   "retryOf": null,
+   "ts": "2026-09-20T14:00:37.769Z",
+   "model": "openai/gpt-5.6-sol",
+   "provider": "bedrock",
+   "mode": "generate",
+   "finish": "stop",
+   "tokens": {
+    "in": 4612,
+    "out": 3089,
+    "text": 385,
+    "reasoning": 2704
+   },
+   "delivered": {
+    "textChars": 1540,
+    "reasoningChars": 0,
+    "toolCalls": 0
+   },
+   "reasoningRequested": "low",
+   "flags": [],
+   "retry": null,
+   "parts": null,
+   "generationId": null,
+   "durationMs": 28688
+  },
+  {
+   "v": 1,
+   "id": "pg_01M2ZHX52E2B1CT3CXNEE764HT",
+   "retryOf": null,
+   "ts": "2026-09-20T14:00:47.438Z",
+   "model": "openai/gpt-5.6-sol",
+   "provider": "openai",
+   "mode": "generate",
+   "finish": "stop",
+   "tokens": {
+    "in": 3783,
+    "out": 2025,
+    "text": 275,
+    "reasoning": 1750
+   },
+   "delivered": {
+    "textChars": 1100,
+    "reasoningChars": 0,
+    "toolCalls": 0
+   },
+   "reasoningRequested": "low",
+   "flags": [],
+   "retry": null,
+   "parts": null,
+   "generationId": null,
+   "durationMs": 14537
+  },
+  {
+   "v": 1,
+   "id": "pg_01M2ZHXKG9YX2SZSPMNPHJD2EV",
+   "retryOf": null,
+   "ts": "2026-09-20T14:01:02.217Z",
+   "model": "openai/gpt-5.6-sol",
+   "provider": "bedrock",
+   "mode": "generate",
+   "finish": "stop",
+   "tokens": {
+    "in": 5049,
+    "out": 3086,
+    "text": 498,
+    "reasoning": 2588
+   },
+   "delivered": {
+    "textChars": 1494,
+    "reasoningChars": 0,
+    "toolCalls": 0
+   },
+   "reasoningRequested": "low",
+   "flags": [],
+   "retry": null,
+   "parts": null,
+   "generationId": null,
+   "durationMs": 28486
+  },
+  {
+   "v": 1,
+   "id": "pg_01M2ZHXWB6SVB8CKNEAQFR550Q",
+   "retryOf": null,
+   "ts": "2026-09-20T14:01:11.270Z",
+   "model": "openai/gpt-5.6-sol",
+   "provider": "openai",
+   "mode": "generate",
+   "finish": "stop",
+   "tokens": {
+    "in": 5864,
+    "out": 7659,
+    "text": 531,
+    "reasoning": 7128
+   },
+   "delivered": {
+    "textChars": 2655,
+    "reasoningChars": 0,
+    "toolCalls": 0
+   },
+   "reasoningRequested": "xhigh",
+   "flags": [],
+   "retry": null,
+   "parts": null,
+   "generationId": null,
+   "durationMs": 54465
+  },
+  {
+   "v": 1,
+   "id": "pg_01M2ZHYNBQV00PF9RCRWTVWVDA",
+   "retryOf": null,
+   "ts": "2026-09-20T14:01:36.887Z",
+   "model": "openai/gpt-5.6-sol",
+   "provider": "bedrock",
+   "mode": "generate",
+   "finish": "stop",
+   "tokens": {
+    "in": 4575,
+    "out": 3583,
+    "text": 477,
+    "reasoning": 3106
+   },
+   "delivered": {
+    "textChars": 1431,
+    "reasoningChars": 0,
+    "toolCalls": 0
+   },
+   "reasoningRequested": "xhigh",
+   "flags": [],
+   "retry": null,
+   "parts": null,
+   "generationId": null,
+   "durationMs": 32639
+  },
+  {
+   "v": 1,
+   "id": "pg_01M2ZHZ29CN5SBVDP112ZE1D47",
+   "retryOf": null,
+   "ts": "2026-09-20T14:01:50.124Z",
+   "model": "openai/gpt-5.6-sol",
+   "provider": "openai",
+   "mode": "generate",
+   "finish": "stop",
+   "tokens": {
+    "in": 5971,
+    "out": 2160,
+    "text": 258,
+    "reasoning": 1902
+   },
+   "delivered": {
+    "textChars": 1290,
+    "reasoningChars": 0,
+    "toolCalls": 0
+   },
+   "reasoningRequested": "low",
+   "flags": [],
+   "retry": null,
+   "parts": null,
+   "generationId": null,
+   "durationMs": 15621
+  },
+  {
+   "v": 1,
+   "id": "pg_01M2ZHZ7TB9SZ3TF15QJNBQ0CT",
+   "retryOf": null,
+   "ts": "2026-09-20T14:01:55.787Z",
+   "model": "openai/gpt-5.6-sol",
+   "provider": "openai",
+   "mode": "generate",
+   "finish": "stop",
+   "tokens": {
+    "in": 4188,
+    "out": 7298,
+    "text": 587,
+    "reasoning": 6711
+   },
+   "delivered": {
+    "textChars": 1761,
+    "reasoningChars": 0,
+    "toolCalls": 0
+   },
+   "reasoningRequested": "xhigh",
+   "flags": [],
+   "retry": null,
+   "parts": null,
+   "generationId": null,
+   "durationMs": 51434
+  },
+  {
+   "v": 1,
+   "id": "pg_01M2ZHZN0HWAD99HD1Q2S3F9MG",
+   "retryOf": null,
+   "ts": "2026-09-20T14:02:09.297Z",
+   "model": "openai/gpt-5.6-sol",
+   "provider": "bedrock",
+   "mode": "generate",
+   "finish": "stop",
+   "tokens": {
+    "in": 4637,
+    "out": 3050,
+    "text": 462,
+    "reasoning": 2588
+   },
+   "delivered": {
+    "textChars": 1386,
+    "reasoningChars": 0,
+    "toolCalls": 0
+   },
+   "reasoningRequested": "xhigh",
+   "flags": [],
+   "retry": null,
+   "parts": null,
+   "generationId": null,
+   "durationMs": 28174
+  },
+  {
+   "v": 1,
+   "id": "pg_01M2ZHZST9NM37NXTVDS2Z0RPT",
+   "retryOf": null,
+   "ts": "2026-09-20T14:02:14.217Z",
+   "model": "openai/gpt-5.6-sol",
+   "provider": "bedrock",
+   "mode": "generate",
+   "finish": "stop",
+   "tokens": {
+    "in": 5106,
+    "out": 3743,
+    "text": 683,
+    "reasoning": 3060
+   },
+   "delivered": {
+    "textChars": 2732,
+    "reasoningChars": 0,
+    "toolCalls": 0
+   },
+   "reasoningRequested": "xhigh",
+   "flags": [],
+   "retry": null,
+   "parts": null,
+   "generationId": null,
+   "durationMs": 33990
+  },
+  {
+   "v": 1,
+   "id": "pg_01M2ZJ00ZTCD4P3KT35ZGPTKJW",
+   "retryOf": null,
+   "ts": "2026-09-20T14:02:21.562Z",
+   "model": "openai/gpt-5.6-sol",
+   "provider": "openai",
+   "mode": "generate",
+   "finish": "stop",
+   "tokens": {
+    "in": 4926,
+    "out": 6013,
+    "text": 317,
+    "reasoning": 5696
+   },
+   "delivered": {
+    "textChars": 1585,
+    "reasoningChars": 0,
+    "toolCalls": 0
+   },
+   "reasoningRequested": "xhigh",
+   "flags": [],
+   "retry": null,
+   "parts": null,
+   "generationId": null,
+   "durationMs": 42511
+  },
+  {
+   "v": 1,
+   "id": "pg_01M2ZJ0HPTXEFTT3MJDCASKHGV",
+   "retryOf": null,
+   "ts": "2026-09-20T14:02:38.682Z",
+   "model": "openai/gpt-5.6-sol",
+   "provider": "openai",
+   "mode": "generate",
+   "finish": "stop",
+   "tokens": {
+    "in": 3694,
+    "out": 2166,
+    "text": 614,
+    "reasoning": 1552
+   },
+   "delivered": {
+    "textChars": 2456,
+    "reasoningChars": 0,
+    "toolCalls": 0
+   },
+   "reasoningRequested": "low",
+   "flags": [],
+   "retry": null,
+   "parts": null,
+   "generationId": null,
+   "durationMs": 15526
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+zai/glm-5.3-flash                            88 attempts · 22 caught
+  provider    attempts   empty        reasoned
+  baseten           51   22 (43.1%)   100%       outlier  p < 0.0001
+  zai               30    0 (0.0%)    100%
+  fireworks          7    0 (0.0%)    100%
+
+zai/glm-4.7                                   66 attempts · 0 caught
+  provider   attempts   empty      reasoned
+  baseten          40   0 (0.0%)   0%
+  zai              26   0 (0.0%)   77%
+
+openai/gpt-5.6-sol                            12 attempts · 0 caught
+  provider   attempts   empty      reasoned
+  bedrock           6   0 (0.0%)   100%
+  openai            6   0 (0.0%)   100%
+
+  reasoning tokens (median)     low   xhigh
+  bedrock                     2,704   3,060   effort appears ignored
+  openai                      1,750   6,711

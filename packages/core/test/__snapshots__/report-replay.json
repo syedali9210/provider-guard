@@ -1,0 +1,150 @@
+[
+  {
+    "model": "zai/glm-5.3-flash",
+    "attempts": 88,
+    "caught": 22,
+    "providers": [
+      {
+        "provider": "baseten",
+        "attempts": 51,
+        "empty": 22,
+        "emptyRate": 0.43137254901960786,
+        "reasoned": 51,
+        "reasonedRate": 1,
+        "medianReasoningTokens": 2,
+        "p": 5.14845764135e-7,
+        "outlier": true
+      },
+      {
+        "provider": "zai",
+        "attempts": 30,
+        "empty": 0,
+        "emptyRate": 0,
+        "reasoned": 30,
+        "reasonedRate": 1,
+        "medianReasoningTokens": 2,
+        "p": 1,
+        "outlier": false
+      },
+      {
+        "provider": "fireworks",
+        "attempts": 7,
+        "empty": 0,
+        "emptyRate": 0,
+        "reasoned": 7,
+        "reasonedRate": 1,
+        "medianReasoningTokens": 2,
+        "p": 1,
+        "outlier": false
+      }
+    ],
+    "reasoning": null
+  },
+  {
+    "model": "zai/glm-4.7",
+    "attempts": 66,
+    "caught": 0,
+    "providers": [
+      {
+        "provider": "baseten",
+        "attempts": 40,
+        "empty": 0,
+        "emptyRate": 0,
+        "reasoned": 0,
+        "reasonedRate": 0,
+        "medianReasoningTokens": 0,
+        "p": 1,
+        "outlier": false
+      },
+      {
+        "provider": "zai",
+        "attempts": 26,
+        "empty": 0,
+        "emptyRate": 0,
+        "reasoned": 20,
+        "reasonedRate": 0.7692307692307693,
+        "medianReasoningTokens": 231.5,
+        "p": 1,
+        "outlier": false
+      }
+    ],
+    "reasoning": null
+  },
+  {
+    "model": "openai/gpt-5.6-sol",
+    "attempts": 12,
+    "caught": 0,
+    "providers": [
+      {
+        "provider": "bedrock",
+        "attempts": 6,
+        "empty": 0,
+        "emptyRate": 0,
+        "reasoned": 6,
+        "reasonedRate": 1,
+        "medianReasoningTokens": 2882,
+        "p": 1,
+        "outlier": false
+      },
+      {
+        "provider": "openai",
+        "attempts": 6,
+        "empty": 0,
+        "emptyRate": 0,
+        "reasoned": 6,
+        "reasonedRate": 1,
+        "medianReasoningTokens": 3799,
+        "p": 1,
+        "outlier": false
+      }
+    ],
+    "reasoning": {
+      "levels": [
+        "low",
+        "xhigh"
+      ],
+      "rows": [
+        {
+          "provider": "bedrock",
+          "runs": {
+            "low": [
+              3303,
+              2704,
+              2588
+            ],
+            "xhigh": [
+              3106,
+              2588,
+              3060
+            ]
+          },
+          "medians": {
+            "low": 2704,
+            "xhigh": 3060
+          },
+          "effortIgnored": true
+        },
+        {
+          "provider": "openai",
+          "runs": {
+            "low": [
+              1750,
+              1902,
+              1552
+            ],
+            "xhigh": [
+              7128,
+              6711,
+              5696
+            ]
+          },
+          "medians": {
+            "low": 1750,
+            "xhigh": 6711
+          },
+          "effortIgnored": false
+        }
+      ]
+    }
+  }
+]
