@@ -3,3 +3,11 @@ packages:
 
 onlyBuiltDependencies:
   - esbuild
+
+# Peers are listed explicitly. Auto-install would pull in Next.js as a peer of `geist`,
+# although Studio only uses its .woff2 files.
+autoInstallPeers: false
+
+peerDependencyRules:
+  ignoreMissing:
+    - next

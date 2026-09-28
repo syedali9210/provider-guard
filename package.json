@@ -6,7 +6,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "pnpm --filter @provider-guard/studio build && pnpm --filter provider-guard build",
+    "build": "pnpm --filter @provider-guard/studio build && pnpm --filter provider-guard build && tsx scripts/copy-studio.ts",
     "test": "pnpm -r test",
     "lint": "biome check .",
     "format": "biome check --write .",
