@@ -52,3 +52,17 @@ test('the replay demo has no console errors', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'zai/glm-5.3-flash' })).toBeVisible()
   expect(errors).toEqual([])
 })
+
+for (const width of [1280, 1024, 800]) {
+  test(`the Feed fits a ${width}px window without scrolling sideways`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 })
+    await page.goto('/')
+    await expect(
+      page.locator('tr.feed-row', { hasText: 'Caught → recovered on' }).first(),
+    ).toBeVisible()
+    const overflow = await page
+      .locator('.feed-scroll')
+      .evaluate((el) => el.scrollWidth - el.clientWidth)
+    expect(overflow).toBeLessThanOrEqual(0)
+  })
+}

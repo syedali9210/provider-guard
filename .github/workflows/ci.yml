@@ -28,20 +28,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
-      - name: Test
-        shell: bash
-        env:
-          DEBUG_PRINT_LIMIT: '300'
-        run: |
-          set -o pipefail
-          pnpm test 2>&1 | tee test-output.txt
-      - name: Annotate failing tests
-        if: failure()
-        shell: bash
-        run: |
-          sed 's/\x1b\[[0-9;]*m//g' test-output.txt \
-            | grep -E "FAIL|×|✗|Error|expected|Unable to|Timed out|threshold" \
-            | head -n 40 | sed 's/^/::error title=pnpm test::/' || true
+      # One package per step: `pnpm -r` prefixes output lines, which hides Vitest's GitHub annotations.
+      - run: pnpm --filter provider-guard test
+      - run: pnpm --filter @provider-guard/studio test
       - run: pnpm build
       - name: Pack, install the tarball in a temp project, run provider-guard --version
         run: pnpm exec tsx scripts/smoke-pack.ts

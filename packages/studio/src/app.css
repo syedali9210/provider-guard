@@ -745,13 +745,23 @@ code {
   height: 40px;
 }
 
-@media (max-width: 760px) {
-  .col-tokens,
-  .col-duration {
+/* The full row needs about 1,130px. Narrower windows drop columns, least important first. */
+@media (max-width: 1180px) {
+  .table .col-duration {
     display: none;
   }
 }
-@media (max-width: 560px) {
+@media (max-width: 1080px) {
+  .col-model {
+    max-width: 160px;
+  }
+}
+@media (max-width: 960px) {
+  .table .col-tokens {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
   .col-model {
     display: none;
   }

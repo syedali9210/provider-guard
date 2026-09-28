@@ -117,6 +117,8 @@ describe('Feed', () => {
     renderStudio(makeSource(many))
     await user.click(rows()[0] as HTMLElement)
     await user.keyboard('{Escape}')
+    // Focus is back on the row immediately after Esc (no frame delay), so End is not lost.
+    expect(rows()[0]).toHaveFocus()
     await user.keyboard('{End}')
     await waitFor(() =>
       expect(document.activeElement?.getAttribute('data-call-id')).toBe(many.at(-1)?.id),

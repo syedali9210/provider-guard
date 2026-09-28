@@ -113,11 +113,9 @@ export function Studio({
   }, [])
   const closeCall = useCallback(() => {
     setOpenId(null)
-    // Return focus to the row that opened the sheet, so keyboard users keep their place.
-    const id = lastTrigger.current
-    requestAnimationFrame(() => {
-      document.querySelector<HTMLElement>(`[data-call-id="${id}"]`)?.focus()
-    })
+    // Return focus to the row that opened the sheet, so keyboard users keep their place. The row
+    // is already in the DOM, so this happens at once: a key pressed right after Esc is not lost.
+    document.querySelector<HTMLElement>(`[data-call-id="${lastTrigger.current}"]`)?.focus()
   }, [])
 
   const replay = source.replay
