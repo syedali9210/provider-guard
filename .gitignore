@@ -8,3 +8,5 @@ test-results/
 playwright-report/
 *.log
 dist-replay/
+packages/core/README.md
+packages/core/LICENSE

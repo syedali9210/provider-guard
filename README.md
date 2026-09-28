@@ -104,3 +104,113 @@ providerOptions: {
 | `baseURL` | `'https://ai-gateway.vercel.sh'` | |
 
 `providerOptions.gateway.exclude` is ignored by AI Gateway as of 2026-09-28. `guard()` logs a warning once per process when it sees it.
+
+## Report
+
+`provider-guard report` summarizes provider health per model from your recorded calls:
+
+```bash
+npx provider-guard report
+```
+
+This is the report on the replay data reconstructed from the three issues:
+
+```
+zai/glm-5.3-flash                            88 attempts · 22 caught
+  provider    attempts   empty        reasoned
+  baseten           51   22 (43.1%)   100%       outlier  p < 0.0001
+  zai               30    0 (0.0%)    100%
+  fireworks          7    0 (0.0%)    100%
+
+zai/glm-4.7                                   66 attempts · 0 caught
+  provider   attempts   empty      reasoned
+  baseten          40   0 (0.0%)   0%
+  zai              26   0 (0.0%)   77%
+
+openai/gpt-5.6-sol                            12 attempts · 0 caught
+  provider   attempts   empty      reasoned
+  bedrock           6   0 (0.0%)   100%
+  openai            6   0 (0.0%)   100%
+
+  reasoning tokens (median)     low   xhigh
+  bedrock                     2,704   3,060   effort appears ignored
+  openai                      1,750   6,711
+```
+
+- **Outlier.** A provider is flagged when it has at least 10 calls, an empty rate of at least 10%, and a one-sided Fisher exact test against every other provider of the same model gives p < 0.01.
+- **Effort appears ignored.** When calls requested at least two reasoning levels, the report shows median reasoning tokens per provider per level. A provider is flagged when its medians at the lowest and highest level differ by less than 25% while another provider of the same model differs by at least 2x. This is reported only; it never triggers a retry.
+- **Options.** `--file <path>` (default `.provider-guard/calls.jsonl`), `--model <id>`, `--since 15m|1h|7d`, and `--json` for machine-readable output.
+- **Exit codes.** `0` success, `1` usage error, `2` records file not found or unreadable. Colors appear only on a terminal and respect `NO_COLOR` and `FORCE_COLOR`.
+
+## Studio
+
+`provider-guard studio` opens a local dashboard at `http://127.0.0.1:4747` (if that port is busy, the next 10 are tried). It reads `.provider-guard/calls.jsonl` and follows it as new calls are recorded.
+
+![Feed with a caught call open in Call anatomy](docs/studio-catch.png)
+
+- **Feed.** Every call, newest first. A caught call shows the provider that served the empty answer, a line to the provider that recovered it, and the result in words. Click a row, or use the arrow keys and Enter, to open Call anatomy.
+- **Call anatomy.** Each attempt's stream parts on one time axis, the retry marked "spliced into the same stream"; the detector's checks with the recorded values; and the summed usage of both attempts.
+- **Providers.** Per model: calls, empty rate, reasoned share, median reasoning tokens, and the outlier badge with its p-value. When effort levels vary, a dot plot shows every run.
+
+![Providers flagging Baseten as the empty-rate outlier](docs/studio-providers.png)
+
+![Reasoning by effort level, with Bedrock ignoring effort](docs/studio-reasoning.png)
+
+To explore without any records of your own, replay the published issue data:
+
+```bash
+npx provider-guard studio --replay all
+```
+
+Options: `--file <path>`, `--port <n>`, `--replay all|vercel-ai-20932|vercel-ai-21207`, `--no-open`, and `--json`.
+
+## Records
+
+Each attempt is one JSON line, appended to `.provider-guard/calls.jsonl` in Node (add `.provider-guard/` to your `.gitignore`). A caught attempt and its retry are linked by `retryOf`:
+
+```jsonc
+{
+  "v": 1,
+  "id": "pg_01K6A…",
+  "retryOf": null,
+  "ts": "2026-09-28T10:15:02.114Z",
+  "model": "zai/glm-5.3-flash",
+  "provider": "baseten",
+  "mode": "stream",
+  "finish": "stop",
+  "tokens": { "in": 1830, "out": 6, "text": 4, "reasoning": 2 },
+  "delivered": { "textChars": 0, "reasoningChars": 4, "toolCalls": 0 },
+  "reasoningRequested": null,
+  "flags": ["billed-but-empty"],
+  "retry": { "attempted": true, "provider": "zai", "outcome": "recovered", "skipReason": null },
+  "parts": [{ "t": "reasoning-delta", "ms": 212 }, { "t": "reasoning-delta", "ms": 260 }, { "t": "finish", "ms": 301 }],
+  "generationId": "gen_…",
+  "durationMs": 301
+}
+```
+
+`retry.outcome` is `recovered`, `still-empty`, `failed`, or `skipped`; a skipped retry says why in `skipReason` (for example `no-alternative-provider` or `tool-call-emitted`).
+
+Pass any sink as `guard({ sink })`: `fileSink(path)` from `provider-guard/node`, `memorySink()`, `consoleSink()`, `noopSink()`, or your own `{ write(record) }`. Sink errors are logged once and never reach your app. In Edge runtimes the default is `memorySink()`.
+
+## Privacy
+
+- **Metadata only.** Records and Studio contain model and provider names, finish reasons, token counts, character counts, and stream part types with timings. They never contain prompts, responses, reasoning text, or tool arguments.
+- **Local and read-only.** Studio binds to `127.0.0.1`, serves only the records file and its own assets, and refuses requests for any other host name.
+- **No telemetry.** provider-guard sends nothing anywhere. Its only network request is to the public AI Gateway endpoints API, from `exclude()` or when a retry needs the model's provider list. Adoption is measured only by npm downloads and GitHub activity.
+
+## Limitations
+
+- **Reasoning drift is report-only.** Effort that appears ignored (vercel/ai#21207) is shown in the report and Studio, never retried.
+- **Gateway metadata is untyped.** Routing metadata is owned by the gateway service and may change without an SDK release. provider-guard validates it at runtime; when it cannot tell which provider served a call, it records the incident and skips the retry. The field names come from public issues and have not yet been confirmed against a live recording.
+- **Retries need AI Gateway.** With other providers, calls are still detected and recorded, but not retried.
+- **Language models only.** Image, video, embedding, speech, and realtime models are not covered.
+- **Runtime.** Node.js 22 or later (as required by `ai@7`) for the file sink, CLI, and Studio. The main entry has no Node imports and runs in Edge runtimes with an in-memory sink.
+
+## If AI Gateway adds `exclude`
+
+AI Gateway ignores a request-level `exclude` today ([vercel/ai#20934](https://github.com/vercel/ai/issues/20934)). If it ships, `exclude()` becomes a thin shim over the native option, and provider-guard will adopt it.
+
+## License
+
+MIT. Not affiliated with Vercel.

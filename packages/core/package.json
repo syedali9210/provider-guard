@@ -50,6 +50,7 @@
     "dist"
   ],
   "scripts": {
+    "prepack": "node -e \"const fs=require('node:fs');fs.copyFileSync('../../README.md','README.md');fs.copyFileSync('../../LICENSE','LICENSE')\"",
     "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsup",
     "test": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
@@ -66,5 +67,9 @@
     "vite": "8.3.1",
     "vitest": "5.0.2",
     "zod": "4.6.5"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }

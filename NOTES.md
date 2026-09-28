@@ -69,3 +69,27 @@ Decisions and discrepancies found while building v0.1. Newest findings are appen
 - Colors follow Node's precedence: `FORCE_COLOR` (unless `0`/`false`) wins over `NO_COLOR`, then TTY detection and `TERM=dumb`.
 - The replay dataset (`scripts/build-replay.ts`) was built in M4 rather than M7 because M4's acceptance runs the report against it.
 - `__snapshots__` are excluded from Biome; formatting them breaks byte-exact file snapshots.
+
+## M5–M6 — Studio (2026-09-28)
+
+### Server (`provider-guard studio`, `packages/core/src/studio.ts`)
+- **Beyond the two PRD endpoints**, `GET /api/config` tells the UI whether it is live or replay and which file it reads, for the data-source badge. It exposes no record data.
+- **Hardening.** Bound to `127.0.0.1`. Requests whose `Host` header is not `127.0.0.1:<port>` or `localhost:<port>` get 403, so a DNS-rebinding page cannot read records. Anything but GET/HEAD gets 405. Every response carries a CSP (`default-src 'self'`), `nosniff`, `no-referrer`, and `X-Frame-Options: DENY`. The theme bootstrap is an external `theme.js`, so the CSP needs no `'unsafe-inline'` for scripts.
+- **Tailing.** Follows the file by byte offset and splits only on the newline byte, which never occurs inside a multi-byte UTF-8 sequence, so a character split across two writes decodes correctly. A shorter file means truncation or replacement, and reading starts over. `fs.watch` (when the file exists) plus `fs.watchFile` polling every 500 ms, because `fs.watch` alone is unreliable on Windows. Verified on Windows by `test/studio.test.ts`, including an append picked up by the watchers alone.
+- **No gaps between load and live.** The UI opens the SSE stream first, then loads `/api/records`; records arriving on both are dropped by id.
+- **Ports.** 4747, then the next 10. `--port 0` is accepted by the server and resolves to the assigned port (used by the tests).
+
+### UI (`packages/studio`)
+- **Geist.** Tokens are generated into `src/tokens.css` from the official values (see M0). Typography classes and materials copy the Geist definitions. All colors reference `--ds-*` tokens.
+- **Result wording.** The PRD lists "Delivered", "Caught → recovered on zai", "Caught · retry failed", and "Caught · no other provider". Two more outcomes exist: "Caught · retry still empty" and "Caught · not retried". The latter has a tooltip naming the skip reason.
+- **Tokens column.** Shows the billed text / reasoning tokens of the attempt that served the call, which is what makes an empty answer visible ("4 / 2"). The summed usage is in Call anatomy.
+- **Hold on hover (not in the PRD).** During replay at 1x, a new row arrives every 800 ms, so rows moved under the pointer and clicks landed on the wrong call. While the pointer is over the list or a row has keyboard focus, the Feed holds its rows still and shows a "Show N New Calls" button: the usual live-tail pattern.
+- **Catch animation.** 450 ms, ease-out: flag mark (0–150 ms), line (150–330 ms), retry chip and check (330–450 ms). It plays once per caught call that arrives while the screen is open. With `prefers-reduced-motion`, the class is never applied (checked in JS, and also disabled in CSS), so the final state shows at once.
+- **Virtualization.** Above 1,000 calls, only the rows in view (plus 12 of overscan) are rendered, with spacer rows. Keyboard moves to rows that are not rendered yet scroll first, then focus.
+- **Charts.** Hand-built SVG, drawn at the figure's measured width, so text stays at its type size instead of scaling with a viewBox.
+- **Replay.** All #21207 runs load as history, so the reasoning panel is there at once. The first 55% of #20932 is history, cut two calls before a catch, and the rest plays at 800 ms per call (200 ms at 4x). Datasets are interleaved in the history and timestamps are rebased to now. Replay records have `generationId: null`; no IDs are made up, so that copy button is disabled with a tooltip.
+- **Bundle.** 81 KB of JS gzipped (budget 150 KB). Fonts and replay data are separate assets.
+
+### Tooling
+- `geist` declares `next` as a peer. With pnpm's `autoInstallPeers`, that installed Next.js just to ship two `.woff2` files, and `packageExtensions` could not make the peer optional. `autoInstallPeers` is off, the missing `next` peer is ignored, and core lists `vite` (vitest's peer) and `zod` (`ai`'s peer) explicitly.
+- **Playwright.** The smoke test runs against the static replay build (`vite build --mode replay`), the same artifact the demo deploys. Locally, `PW_CHANNEL=msedge` drives the installed Edge instead of downloading Playwright's Chromium. CI installs Chromium.
