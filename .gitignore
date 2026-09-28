@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+.provider-guard/
+*.tgz
+.vercel/
+test-results/
+playwright-report/
+*.log

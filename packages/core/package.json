@@ -1,0 +1,68 @@
+{
+  "name": "provider-guard",
+  "version": "0.0.0",
+  "description": "The gateway catches errors. provider-guard catches successes that aren't.",
+  "license": "MIT",
+  "type": "module",
+  "keywords": [
+    "ai",
+    "ai-sdk",
+    "ai-gateway",
+    "middleware",
+    "vercel",
+    "llm",
+    "fallback"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./node": {
+      "import": {
+        "types": "./dist/node.d.ts",
+        "default": "./dist/node.js"
+      },
+      "require": {
+        "types": "./dist/node.d.cts",
+        "default": "./dist/node.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "provider-guard": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "ai": ">=7 <8"
+  },
+  "devDependencies": {
+    "@ai-sdk/gateway": "4.0.96",
+    "@ai-sdk/provider": "4.0.18",
+    "@vitest/coverage-v8": "5.0.2",
+    "ai": "7.0.118",
+    "tsup": "8.5.1",
+    "vitest": "5.0.2"
+  }
+}
