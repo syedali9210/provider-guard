@@ -3,6 +3,16 @@
   "version": "0.0.0",
   "description": "The gateway catches errors. provider-guard catches successes that aren't.",
   "license": "MIT",
+  "author": "Syed Ali",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syedali9210/vercel-demo.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/syedali9210/vercel-demo#readme",
+  "bugs": {
+    "url": "https://github.com/syedali9210/vercel-demo/issues"
+  },
   "type": "module",
   "keywords": [
     "ai",
