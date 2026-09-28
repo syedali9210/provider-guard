@@ -2,7 +2,7 @@
 
 > **The gateway catches errors. provider-guard catches successes that aren't.**
 
-[![CI](https://github.com/syedali9210/vercel-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/syedali9210/vercel-demo/actions/workflows/ci.yml) · **[Live demo](https://provider-guard-demo.vercel.app)**, a replay of the data published in the issues below
+[![npm](https://img.shields.io/npm/v/provider-guard)](https://www.npmjs.com/package/provider-guard) [![CI](https://github.com/syedali9210/provider-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/syedali9210/provider-guard/actions/workflows/ci.yml) · **[Live demo](https://provider-guard-demo.vercel.app)**, a replay of the data published in the issues below
 
 AI SDK middleware for apps on Vercel AI Gateway. It catches responses that return HTTP 200 and bill tokens but deliver nothing, retries them once on a different provider, lets you exclude one provider for one model, and records what happened without ever storing prompts or responses.
 
@@ -148,15 +148,15 @@ openai/gpt-5.6-sol                            12 attempts · 0 caught
 
 `provider-guard studio` opens a local dashboard at `http://127.0.0.1:4747` (if that port is busy, the next 10 are tried). It reads `.provider-guard/calls.jsonl` and follows it as new calls are recorded.
 
-![Feed with a caught call open in Call anatomy](docs/studio-catch.png)
+![Feed with a caught call open in Call anatomy](https://raw.githubusercontent.com/syedali9210/provider-guard/main/docs/studio-catch.png)
 
 - **Feed.** Every call, newest first. A caught call shows the provider that served the empty answer, a line to the provider that recovered it, and the result in words. Click a row, or use the arrow keys and Enter, to open Call anatomy.
 - **Call anatomy.** Each attempt's stream parts on one time axis, the retry marked "spliced into the same stream"; the detector's checks with the recorded values; and the summed usage of both attempts.
 - **Providers.** Per model: calls, empty rate, reasoned share, median reasoning tokens, and the outlier badge with its p-value. When effort levels vary, a dot plot shows every run.
 
-![Providers flagging Baseten as the empty-rate outlier](docs/studio-providers.png)
+![Providers flagging Baseten as the empty-rate outlier](https://raw.githubusercontent.com/syedali9210/provider-guard/main/docs/studio-providers.png)
 
-![Reasoning by effort level, with Bedrock ignoring effort](docs/studio-reasoning.png)
+![Reasoning by effort level, with Bedrock ignoring effort](https://raw.githubusercontent.com/syedali9210/provider-guard/main/docs/studio-reasoning.png)
 
 The public demo at **https://provider-guard-demo.vercel.app** plays the published issue data. To replay it locally without any records of your own:
 

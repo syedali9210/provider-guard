@@ -6,12 +6,12 @@
   "author": "Syed Ali",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/syedali9210/vercel-demo.git",
+    "url": "git+https://github.com/syedali9210/provider-guard.git",
     "directory": "packages/core"
   },
-  "homepage": "https://github.com/syedali9210/vercel-demo#readme",
+  "homepage": "https://github.com/syedali9210/provider-guard#readme",
   "bugs": {
-    "url": "https://github.com/syedali9210/vercel-demo/issues"
+    "url": "https://github.com/syedali9210/provider-guard/issues"
   },
   "type": "module",
   "keywords": [
