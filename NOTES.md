@@ -93,3 +93,12 @@ Decisions and discrepancies found while building v0.1. Newest findings are appen
 ### Tooling
 - `geist` declares `next` as a peer. With pnpm's `autoInstallPeers`, that installed Next.js just to ship two `.woff2` files, and `packageExtensions` could not make the peer optional. `autoInstallPeers` is off, the missing `next` peer is ignored, and core lists `vite` (vitest's peer) and `zod` (`ai`'s peer) explicitly.
 - **Playwright.** The smoke test runs against the static replay build (`vite build --mode replay`), the same artifact the demo deploys. Locally, `PW_CHANNEL=msedge` drives the installed Edge instead of downloading Playwright's Chromium. CI installs Chromium.
+
+## M7 — release and deploy (2026-09-28)
+
+- **Repository.** `github.com/syedali9210/vercel-demo` (chosen by the owner). `packages/core/package.json` points `repository`, `homepage`, and `bugs` there: npm provenance requires `repository` to match the publishing repo, and npmjs.com resolves the README's relative images through it.
+- **Demo.** The Vercel project `provider-guard-demo` (team "syedwali9286-1132's projects") is linked to the repo with root directory `packages/studio`; `packages/studio/vercel.json` sets the build (`vite build --mode replay`), output (`dist-replay`), CSP, and asset caching. Every push to `main` redeploys. The production domain **https://provider-guard-demo.vercel.app** is public. Team-suffixed and per-deployment URLs require Vercel login (the default Standard Protection).
+- **Vercel connector limits.** The connector could create the project but could not read it back or create a production deployment (403). The Git integration deploys instead.
+- **Release workflow.** It needs two things only the owner can do: turn on "Allow GitHub Actions to create and approve pull requests" (Settings → Actions → General), since the first run failed on exactly that, and add an `NPM_TOKEN` repository secret. Then merging the "Version Packages" PR publishes `provider-guard@0.1.0` with provenance.
+- **A cross-platform race found by CI.** After Esc, focus returned to the Feed row on the next animation frame, so a key pressed right away landed on `<body>`. It passed on Windows and failed on Linux and macOS. Focus now returns synchronously.
+- **CI annotations.** `pnpm -r` prefixes each output line with the package name, so Vitest's `::error` lines were not parsed as annotations. CI runs each package's tests in its own step.

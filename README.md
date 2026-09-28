@@ -2,6 +2,8 @@
 
 > **The gateway catches errors. provider-guard catches successes that aren't.**
 
+[![CI](https://github.com/syedali9210/vercel-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/syedali9210/vercel-demo/actions/workflows/ci.yml) · **[Live demo](https://provider-guard-demo.vercel.app)**, a replay of the data published in the issues below
+
 AI SDK middleware for apps on Vercel AI Gateway. It catches responses that return HTTP 200 and bill tokens but deliver nothing, retries them once on a different provider, lets you exclude one provider for one model, and records what happened without ever storing prompts or responses.
 
 ## The problem
@@ -156,7 +158,7 @@ openai/gpt-5.6-sol                            12 attempts · 0 caught
 
 ![Reasoning by effort level, with Bedrock ignoring effort](docs/studio-reasoning.png)
 
-To explore without any records of your own, replay the published issue data:
+The public demo at **https://provider-guard-demo.vercel.app** plays the published issue data. To replay it locally without any records of your own:
 
 ```bash
 npx provider-guard studio --replay all
