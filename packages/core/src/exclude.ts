@@ -36,10 +36,13 @@ export class ProviderListUnavailableError extends Error {
 
 const DEFAULT_BASE_URL = 'https://ai-gateway.vercel.sh'
 const DEFAULT_TTL_MS = 10 * 60_000
+/** After a failed fetch, calls answer from what is known instead of refetching every time. */
+const FAILURE_BACKOFF_MS = 30_000
 
 type Entry = {
   providers?: string[]
   fetchedAt: number
+  retryAt: number
   error?: unknown
   inflight?: Promise<void>
 }
@@ -75,21 +78,24 @@ async function loadEntry(modelId: string, options: ExcludeOptions): Promise<Entr
   const key = `${baseURL} ${modelId}`
   let entry = cache.get(key)
   if (!entry) {
-    entry = { fetchedAt: 0 }
+    entry = { fetchedAt: 0, retryAt: 0 }
     cache.set(key, entry)
   }
   const current = entry
   const refresh = () => {
+    if (Date.now() < current.retryAt) return Promise.resolve()
     current.inflight ??= fetchProviders(modelId, baseURL, options.fetch ?? globalThis.fetch)
       .then(
         (providers) => {
           current.providers = providers
           current.fetchedAt = Date.now()
+          current.retryAt = 0
           current.error = undefined
         },
         (error) => {
-          // Keep the last known list; remember why the refresh failed.
+          // Keep the last known list; remember why the refresh failed and back off.
           current.error = error
+          current.retryAt = Date.now() + FAILURE_BACKOFF_MS
         },
       )
       .finally(() => {
