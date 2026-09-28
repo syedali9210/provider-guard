@@ -299,7 +299,8 @@ export function Sheet({
   useEffect(() => {
     if (!open) return
     const node = ref.current
-    ;(node?.querySelector<HTMLElement>('[data-autofocus]') ?? node)?.focus()
+    // preventScroll: focusing must not scroll the panel away from its title.
+    ;(node?.querySelector<HTMLElement>('[data-autofocus]') ?? node)?.focus({ preventScroll: true })
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
@@ -494,6 +495,25 @@ export function useReducedMotion(): boolean {
     return () => media.removeEventListener('change', onChange)
   }, [])
   return reduced
+}
+
+/**
+ * The element's content width, so charts can draw at 1:1 (text stays at its type size instead of
+ * scaling with a viewBox). Falls back to `fallback` where ResizeObserver is unavailable.
+ */
+export function useWidth<T extends HTMLElement>(fallback: number) {
+  const ref = useRef<T>(null)
+  const [width, setWidth] = useState(fallback)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry && entry.contentRect.width > 0) setWidth(Math.round(entry.contentRect.width))
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+  return [ref, width] as const
 }
 
 export function useNow(intervalMs: number): number {

@@ -219,7 +219,8 @@ export function Studio({
 
       <footer className="footer text-label-12">Not affiliated with Vercel.</footer>
 
-      <Sheet open={open !== null} onClose={closeCall} labelledBy="anatomy-title">
+      {/* Keyed by call: each opened call starts at the top with focus on Close. */}
+      <Sheet key={open?.id} open={open !== null} onClose={closeCall} labelledBy="anatomy-title">
         {open && <CallAnatomy call={open} now={now} onClose={closeCall} />}
       </Sheet>
     </div>

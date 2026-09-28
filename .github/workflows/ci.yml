@@ -32,3 +32,22 @@ jobs:
       - run: pnpm build
       - name: Pack, install the tarball in a temp project, run provider-guard --version
         run: pnpm exec tsx scripts/smoke-pack.ts
+
+  e2e:
+    name: Replay demo smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @provider-guard/studio exec playwright install --with-deps chromium
+      - run: pnpm --filter @provider-guard/studio e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: packages/studio/test-results

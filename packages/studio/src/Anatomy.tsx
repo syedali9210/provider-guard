@@ -4,7 +4,7 @@ import { type ReactNode, useEffect, useState } from 'react'
 import type { Call } from './data'
 import { ProviderChip, ResultLabel } from './Feed'
 import { formatMs, num, relativeTime } from './format'
-import { Button, IconCheck, IconCopy, IconFlag, IconX, Tooltip } from './ui'
+import { Button, IconCheck, IconCopy, IconFlag, IconX, Tooltip, useWidth } from './ui'
 
 type Kind = 'reasoning' | 'text' | 'tool' | 'finish' | 'other'
 
@@ -58,7 +58,8 @@ export function Timeline({ attempts }: { attempts: CallRecord[] }) {
   }))
   const end = Math.max(1, ...lanes.map((l) => l.offset + l.record.durationMs))
   const step = niceStep(end)
-  const W = 460
+  const [figure, measured] = useWidth<HTMLElement>(460)
+  const W = Math.max(280, measured)
   const left = 0
   const plot = W - left - 8
   const x = (ms: number) => left + (ms / end) * plot
@@ -67,10 +68,11 @@ export function Timeline({ attempts }: { attempts: CallRecord[] }) {
   const streamed = attempts.some((a) => a.parts)
 
   return (
-    <figure className="timeline">
+    <figure className="timeline" ref={figure}>
       <svg
         viewBox={`0 0 ${W} ${H}`}
-        width="100%"
+        width={W}
+        height={H}
         role="img"
         aria-label={lanes
           .map(

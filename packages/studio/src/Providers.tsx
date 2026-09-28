@@ -10,7 +10,7 @@ import {
 import type { ReasoningLevel } from '@core/types'
 import { useMemo } from 'react'
 import { num } from './format'
-import { Badge, IconWarning, Tooltip } from './ui'
+import { Badge, IconWarning, Tooltip, useWidth } from './ui'
 
 const pct = (x: number, digits = 0) => `${(x * 100).toFixed(digits)}%`
 
@@ -96,7 +96,8 @@ const levelClass = (levels: ReasoningLevel[], level: ReasoningLevel) =>
 export function DotPlot({ panel }: { panel: ReasoningPanel }) {
   const values = panel.rows.flatMap((r) => Object.values(r.runs).flat() as number[])
   const max = Math.max(1, ...values) * 1.08
-  const W = 520
+  const [figure, measured] = useWidth<HTMLElement>(520)
+  const W = Math.max(320, measured)
   const labelWidth = 96
   const plot = W - labelWidth - 12
   const x = (v: number) => labelWidth + (v / max) * plot
@@ -114,10 +115,11 @@ export function DotPlot({ panel }: { panel: ReasoningPanel }) {
     .join('. ')
 
   return (
-    <figure className="dotplot">
+    <figure className="dotplot" ref={figure}>
       <svg
         viewBox={`0 0 ${W} ${H}`}
-        width="100%"
+        width={W}
+        height={H}
         role="img"
         aria-label={`Reasoning tokens per run. ${summary}.`}
       >

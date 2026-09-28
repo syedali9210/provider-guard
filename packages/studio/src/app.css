@@ -964,10 +964,18 @@ code {
   box-shadow: none;
 }
 
+.timeline,
+.dotplot {
+  min-width: 0;
+}
+/* The SVG is drawn at its measured width; max-width lets the figure shrink first (for example
+ * when a scrollbar appears), so the measurement can follow instead of forcing overflow. */
 .timeline svg,
 .dotplot svg {
   display: block;
   overflow: visible;
+  max-width: 100%;
+  height: auto;
 }
 .axis-grid {
   stroke: var(--ds-gray-alpha-200);
