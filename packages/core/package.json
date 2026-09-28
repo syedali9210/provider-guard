@@ -1,6 +1,6 @@
 {
   "name": "provider-guard",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The gateway catches errors. provider-guard catches successes that aren't.",
   "license": "MIT",
   "author": "Syed Ali",

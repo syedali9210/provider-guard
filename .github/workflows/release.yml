@@ -1,21 +1,26 @@
 name: Release
 
-# On main: opens (or updates) a "Version Packages" PR from pending changesets. Merging that PR
-# publishes to npm with provenance. Needs an NPM_TOKEN repository secret (an npm automation or
-# granular token with publish rights for provider-guard).
+# Publishes provider-guard to npm, with provenance, when packages/core/package.json carries a
+# version that is not on npm yet. Versions come from changesets, applied locally:
+#
+#   pnpm changeset          # describe the change
+#   pnpm changeset version  # bump the version and write CHANGELOG.md; commit and push
+#
+# Publishing needs an NPM_TOKEN repository secret. Without it, the run succeeds and says that
+# publishing was skipped; add the secret, then re-run this workflow (or push again).
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
   id-token: write # npm provenance
 
 jobs:
-  release:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -25,14 +30,31 @@ jobs:
           node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
-      - run: pnpm install --frozen-lockfile
-      - uses: changesets/action@v1
-        with:
-          version: pnpm changeset version
-          publish: pnpm release
-          title: Version Packages
-          commit: Version Packages
+
+      - name: Decide whether to publish
+        id: decide
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          version=$(node -p "require('./packages/core/package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if npm view "provider-guard@$version" version > /dev/null 2>&1; then
+            echo "provider-guard@$version is already on npm. Nothing to publish."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          elif [ -z "$NPM_TOKEN" ]; then
+            echo "::notice title=Publishing skipped::provider-guard@$version is not on npm yet, and the NPM_TOKEN secret is not set. Add the secret, then re-run this workflow."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.decide.outputs.publish == 'true'
+        run: pnpm install --frozen-lockfile
+      - if: steps.decide.outputs.publish == 'true'
+        run: pnpm build
+      - name: Publish provider-guard@${{ steps.decide.outputs.version }}
+        if: steps.decide.outputs.publish == 'true'
+        run: pnpm --filter provider-guard publish --no-git-checks
+        env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true

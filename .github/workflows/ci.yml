@@ -48,7 +48,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @provider-guard/studio exec playwright install --with-deps chromium
       - run: pnpm --filter @provider-guard/studio e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: playwright-traces
