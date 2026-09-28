@@ -28,7 +28,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test
+      - name: Test
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm test 2>&1 | tee test-output.txt
+      - name: Annotate the end of the test output on failure
+        if: failure()
+        shell: bash
+        run: tail -n 40 test-output.txt | sed 's/\x1b\[[0-9;]*m//g' | sed 's/^/::error title=pnpm test::/' || true
       - run: pnpm build
       - name: Pack, install the tarball in a temp project, run provider-guard --version
         run: pnpm exec tsx scripts/smoke-pack.ts
