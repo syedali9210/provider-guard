@@ -204,7 +204,7 @@ Pass any sink as `guard({ sink })`: `fileSink(path)` from `provider-guard/node`,
 ## Limitations
 
 - **Reasoning drift is report-only.** Effort that appears ignored (vercel/ai#21207) is shown in the report and Studio, never retried.
-- **Gateway metadata is untyped.** Routing metadata is owned by the gateway service and may change without an SDK release. provider-guard validates it at runtime; when it cannot tell which provider served a call, it records the incident and skips the retry. The field names come from public issues and have not yet been confirmed against a live recording.
+- **Gateway metadata is untyped.** Routing metadata is owned by the gateway service and may change without an SDK release. provider-guard validates it at runtime; when it cannot tell which provider served a call, it records the incident and skips the retry. The field names were confirmed against a live AI Gateway recording on 2026-09-29 (`fixtures/live-ling-3.0-flash-novita.json`), which a test replays.
 - **Retries need AI Gateway.** With other providers, calls are still detected and recorded, but not retried.
 - **Language models only.** Image, video, embedding, speech, and realtime models are not covered.
 - **Runtime.** Node.js 22 or later (as required by `ai@7`) for the file sink, CLI, and Studio. The main entry has no Node imports and runs in Edge runtimes with an in-memory sink.

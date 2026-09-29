@@ -1,0 +1,324 @@
+{
+  "source": "Live recording of inclusionai/ling-3.0-flash through AI Gateway, pinned to novita, 2026-09-29, made with scripts/live-repro.ts. Text replaced by its length; session and request IDs redacted.",
+  "calls": [
+    [
+      {
+        "type": "stream-start",
+        "warnings": []
+      },
+      {
+        "type": "response-metadata",
+        "id": "<redacted>",
+        "modelId": "inclusionai/ling-3.0-flash",
+        "timestamp": "2026-09-29T07:34:11.000Z"
+      },
+      {
+        "type": "reasoning-start",
+        "id": "reasoning-0"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<3 chars>"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<17 chars>"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<20 chars>"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<22 chars>"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<17 chars>"
+      },
+      {
+        "type": "reasoning-end",
+        "id": "reasoning-0"
+      },
+      {
+        "type": "tool-input-start",
+        "id": "call_9bb5c132f4494a19b6bf86b4",
+        "toolName": "weather"
+      },
+      {
+        "type": "tool-input-delta",
+        "id": "call_9bb5c132f4494a19b6bf86b4",
+        "delta": "<1 chars>"
+      },
+      {
+        "type": "tool-input-delta",
+        "id": "call_9bb5c132f4494a19b6bf86b4",
+        "delta": "<14 chars>"
+      },
+      {
+        "type": "tool-input-delta",
+        "id": "call_9bb5c132f4494a19b6bf86b4",
+        "delta": "<1 chars>"
+      },
+      {
+        "type": "tool-input-delta",
+        "id": "call_9bb5c132f4494a19b6bf86b4",
+        "delta": "<1 chars>"
+      },
+      {
+        "type": "tool-input-end",
+        "id": "call_9bb5c132f4494a19b6bf86b4"
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "call_9bb5c132f4494a19b6bf86b4",
+        "toolName": "weather",
+        "input": "<17 chars>"
+      },
+      {
+        "type": "finish",
+        "finishReason": {
+          "unified": "tool-calls",
+          "raw": "tool_calls"
+        },
+        "usage": {
+          "inputTokens": {
+            "total": 248,
+            "noCache": 248,
+            "cacheRead": 0
+          },
+          "outputTokens": {
+            "total": 31,
+            "text": 31,
+            "reasoning": 0
+          },
+          "raw": {
+            "prompt_tokens": 248,
+            "completion_tokens": 31,
+            "total_tokens": 279,
+            "prompt_tokens_details": null,
+            "completion_tokens_details": null
+          }
+        },
+        "providerMetadata": {
+          "novita": {},
+          "gateway": {
+            "routing": {
+              "originalModelId": "inclusionai/ling-3.0-flash",
+              "resolvedProvider": "novita",
+              "fallbacksAvailable": [],
+              "planningReasoning": "Provider set restricted to: novita. System credentials planned for: novita. Total execution order: novita(system)",
+              "canonicalSlug": "inclusionai/ling-3.0-flash",
+              "finalProvider": "novita",
+              "modelAttemptCount": 1,
+              "modelAttempts": [
+                {
+                  "canonicalSlug": "inclusionai/ling-3.0-flash",
+                  "success": true,
+                  "providerAttemptCount": 1,
+                  "providerAttempts": [
+                    {
+                      "provider": "novita",
+                      "credentialType": "system",
+                      "success": true,
+                      "startTime": 1790667250701,
+                      "endTime": 1790667251571,
+                      "providerRequestId": "<redacted>",
+                      "statusCode": 200,
+                      "providerResponseId": "<redacted>"
+                    }
+                  ]
+                }
+              ],
+              "totalProviderAttemptCount": 1,
+              "affinity": {
+                "outcome": "skipped_below_min_prefix"
+              },
+              "clientSessionId": "<redacted>",
+              "clientSessionIdSource": "fingerprint"
+            },
+            "cost": "0.000007161",
+            "marketCost": "0.000007161",
+            "surchargeCost": "0",
+            "gatewayCost": "0.000007161",
+            "inferenceCost": "0.000007161",
+            "inputInferenceCost": "0.000005208",
+            "outputInferenceCost": "0.000001953",
+            "generationId": "gen_redacted"
+          }
+        }
+      }
+    ],
+    [
+      {
+        "type": "stream-start",
+        "warnings": []
+      },
+      {
+        "type": "response-metadata",
+        "id": "<redacted>",
+        "modelId": "inclusionai/ling-3.0-flash",
+        "timestamp": "2026-09-29T07:34:12.000Z"
+      },
+      {
+        "type": "reasoning-start",
+        "id": "reasoning-0"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<3 chars>"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<12 chars>"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<9 chars>"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<5 chars>"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<17 chars>"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<8 chars>"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<17 chars>"
+      },
+      {
+        "type": "reasoning-delta",
+        "id": "reasoning-0",
+        "delta": "<10 chars>"
+      },
+      {
+        "type": "reasoning-end",
+        "id": "reasoning-0"
+      },
+      {
+        "type": "text-start",
+        "id": "txt-0"
+      },
+      {
+        "type": "text-delta",
+        "id": "txt-0",
+        "delta": "<3 chars>"
+      },
+      {
+        "type": "text-delta",
+        "id": "txt-0",
+        "delta": "<19 chars>"
+      },
+      {
+        "type": "text-delta",
+        "id": "txt-0",
+        "delta": "<11 chars>"
+      },
+      {
+        "type": "text-delta",
+        "id": "txt-0",
+        "delta": "<8 chars>"
+      },
+      {
+        "type": "text-delta",
+        "id": "txt-0",
+        "delta": "<13 chars>"
+      },
+      {
+        "type": "text-end",
+        "id": "txt-0"
+      },
+      {
+        "type": "finish",
+        "finishReason": {
+          "unified": "stop",
+          "raw": "stop"
+        },
+        "usage": {
+          "inputTokens": {
+            "total": 309,
+            "noCache": 309,
+            "cacheRead": 0
+          },
+          "outputTokens": {
+            "total": 37,
+            "text": 37,
+            "reasoning": 0
+          },
+          "raw": {
+            "prompt_tokens": 309,
+            "completion_tokens": 37,
+            "total_tokens": 346,
+            "prompt_tokens_details": null,
+            "completion_tokens_details": null
+          }
+        },
+        "providerMetadata": {
+          "novita": {},
+          "gateway": {
+            "routing": {
+              "originalModelId": "inclusionai/ling-3.0-flash",
+              "resolvedProvider": "novita",
+              "fallbacksAvailable": [],
+              "planningReasoning": "Provider set restricted to: novita. System credentials planned for: novita. Total execution order: novita(system)",
+              "canonicalSlug": "inclusionai/ling-3.0-flash",
+              "finalProvider": "novita",
+              "modelAttemptCount": 1,
+              "modelAttempts": [
+                {
+                  "canonicalSlug": "inclusionai/ling-3.0-flash",
+                  "success": true,
+                  "providerAttemptCount": 1,
+                  "providerAttempts": [
+                    {
+                      "provider": "novita",
+                      "credentialType": "system",
+                      "success": true,
+                      "startTime": 1790667252019,
+                      "endTime": 1790667252936,
+                      "providerRequestId": "<redacted>",
+                      "statusCode": 200,
+                      "providerResponseId": "<redacted>"
+                    }
+                  ]
+                }
+              ],
+              "totalProviderAttemptCount": 1,
+              "affinity": {
+                "outcome": "skipped_below_min_prefix"
+              },
+              "clientSessionId": "<redacted>",
+              "clientSessionIdSource": "fingerprint"
+            },
+            "cost": "0.00000882",
+            "marketCost": "0.00000882",
+            "surchargeCost": "0",
+            "gatewayCost": "0.00000882",
+            "inferenceCost": "0.00000882",
+            "inputInferenceCost": "0.000006489",
+            "outputInferenceCost": "0.000002331",
+            "generationId": "gen_redacted"
+          }
+        }
+      }
+    ]
+  ]
+}
