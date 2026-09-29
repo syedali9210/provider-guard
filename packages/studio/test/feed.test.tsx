@@ -102,6 +102,26 @@ describe('Feed', () => {
     expect(screen.queryByRole('button', { name: /New Call/ })).not.toBeInTheDocument()
   })
 
+  test('rows also hold while the page is scrolled down, since touch screens have no hover', () => {
+    const base = [healthy(1), healthy(2)]
+    const { rerenderWith } = renderStudio(makeSource(base))
+    const scrollTo = (y: number) => {
+      Object.defineProperty(window, 'scrollY', { value: y, configurable: true })
+      fireEvent.scroll(window)
+    }
+    try {
+      scrollTo(600)
+      rerenderWith(makeSource([...base, healthy(0, { ts: '2026-09-28T11:00:00.000Z' })]))
+      expect(rows()).toHaveLength(2)
+      expect(screen.getByRole('button', { name: 'Show 1 New Call' })).toBeInTheDocument()
+
+      scrollTo(0)
+      expect(rows()).toHaveLength(3)
+    } finally {
+      scrollTo(0)
+    }
+  })
+
   test(`virtualizes above ${VIRTUALIZE_ABOVE} rows`, () => {
     const many = Array.from({ length: 1500 }, (_, i) => healthy(i))
     renderStudio(makeSource(many))
@@ -212,6 +232,74 @@ describe('top bar', () => {
     expect(setSpeed).toHaveBeenCalledWith(4)
     await user.click(screen.getByRole('button', { name: 'Restart Replay' }))
     expect(restart).toHaveBeenCalledOnce()
+  })
+
+  test('on phones the controls open from Options, and Restart Replay closes it', async () => {
+    const user = userEvent.setup()
+    const setSpeed = vi.fn()
+    const restart = vi.fn()
+    renderStudio(
+      makeSource([caught, caughtRetry], {
+        mode: 'replay',
+        label: 'Replay · vercel/ai#20932, #21207',
+        replay: {
+          datasets: ['vercel-ai-20932', 'vercel-ai-21207'],
+          speed: 1,
+          setSpeed,
+          restart,
+          finished: false,
+        },
+      }),
+    )
+    await user.click(screen.getByRole('button', { name: 'Open Options' }))
+    const options = screen.getByRole('dialog', { name: 'Options' })
+    expect(within(options).getByRole('button', { name: 'Close' })).toHaveFocus()
+    expect(within(options).getByRole('combobox', { name: 'Time range' })).toBeInTheDocument()
+    expect(within(options).getByRole('group', { name: 'Select a display theme:' })).toBeVisible()
+    await user.click(within(options).getByRole('radio', { name: '4x' }))
+    expect(setSpeed).toHaveBeenCalledWith(4)
+
+    await user.click(within(options).getByRole('button', { name: 'Restart Replay' }))
+    expect(restart).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('dialog', { name: 'Options' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Open Options' })).toHaveFocus()
+  })
+
+  test('How It Works opens from Options, and Options has no replay controls in live mode', async () => {
+    const user = userEvent.setup()
+    const replayMode = makeSource([caught, caughtRetry], {
+      mode: 'replay',
+      label: 'Replay · vercel/ai#20932, #21207',
+      replay: {
+        datasets: ['vercel-ai-20932'],
+        speed: 1,
+        setSpeed: vi.fn(),
+        restart: vi.fn(),
+        finished: false,
+      },
+    })
+    const { unmount } = renderStudio(replayMode)
+    await user.click(screen.getByRole('button', { name: 'Open Options' }))
+    const options = screen.getByRole('dialog', { name: 'Options' })
+    await user.click(within(options).getByRole('button', { name: 'How It Works' }))
+    expect(screen.queryByRole('dialog', { name: 'Options' })).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'How It Works' })).toBeInTheDocument()
+    unmount()
+
+    renderStudio(makeSource([caught, caughtRetry]))
+    await user.click(screen.getByRole('button', { name: 'Open Options' }))
+    const live = screen.getByRole('dialog', { name: 'Options' })
+    expect(within(live).queryByRole('button', { name: 'Restart Replay' })).not.toBeInTheDocument()
+    expect(within(live).queryByRole('button', { name: 'How It Works' })).not.toBeInTheDocument()
+    expect(within(live).getByRole('combobox', { name: 'Time range' })).toBeInTheDocument()
+  })
+
+  test('a caught result keeps its full words for screen readers, with a short form for phones', () => {
+    renderStudio(makeSource([caught, caughtRetry]))
+    const result = rows()[0]?.querySelector('.result') as HTMLElement
+    expect(within(result).getByText(/^Caught → recovered on /)).toBeInTheDocument()
+    const short = within(result).getByText(/^Recovered on /)
+    expect(short).toHaveAttribute('aria-hidden', 'true')
   })
 
   test('the footer says it is not affiliated with Vercel', () => {

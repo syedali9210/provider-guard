@@ -76,13 +76,30 @@ const TONE: Record<Call['result'], string> = {
   'not-retried': 'result-muted',
 }
 
+/**
+ * On phones the red flag already says the call was caught, so the visible result drops that word
+ * ("Recovered on zai"). Screen readers always get the full result.
+ */
+function ResultText({ text }: { text: string }) {
+  const short = text.replace(/^Caught [→·] /, '')
+  if (short === text) return <>{text}</>
+  return (
+    <>
+      <span className="result-full">{text}</span>
+      <span className="result-short" aria-hidden="true">
+        {short.charAt(0).toUpperCase() + short.slice(1)}
+      </span>
+    </>
+  )
+}
+
 export function ResultLabel({ call }: { call: Call }) {
   const text = resultText(call)
   if (call.result === 'delivered') {
     return (
       <span className="result result-quiet">
         <IconCheck />
-        {text}
+        <ResultText text={text} />
       </span>
     )
   }
@@ -90,7 +107,7 @@ export function ResultLabel({ call }: { call: Call }) {
     return (
       <span className="result result-recovered">
         <IconCheck className="result-check" />
-        {text}
+        <ResultText text={text} />
       </span>
     )
   }
@@ -106,7 +123,7 @@ export function ResultLabel({ call }: { call: Call }) {
   return (
     <span className={`result ${TONE[call.result]}`}>
       {icon}
-      {text}
+      <ResultText text={text} />
       {reason && call.result === 'not-retried' && (
         <Tooltip text={reason}>
           <button type="button" className="info-button" aria-label="Why it was not retried">
@@ -160,14 +177,31 @@ export function Feed({
   const pendingFocus = useRef<string | null>(null)
   const [announcement, setAnnouncement] = useState('')
   const announced = useRef(new Set<string>())
-  // While the pointer is over the list or a row has focus, hold the rows in place so nothing
-  // moves under the user; new calls wait behind a "Show N New Calls" button.
+  // While the pointer is over the list, a row has focus, or the list is scrolled down, hold the
+  // rows in place so nothing moves under the user; new calls wait behind a "Show N New Calls"
+  // button. Scrolling counts because touch screens have no hover.
   const [held, setHeld] = useState<Call[] | null>(null)
   const pointerInside = useRef(false)
   const focusInside = useRef(false)
+  const scrolledDown = useRef(false)
   const release = () => {
-    if (!pointerInside.current && !focusInside.current) setHeld(null)
+    if (!pointerInside.current && !focusInside.current && !scrolledDown.current) setHeld(null)
   }
+  // The list scrolls itself on wider screens and scrolls with the page on phones.
+  const checkScroll = () => {
+    const down = (scrollRef.current?.scrollTop ?? 0) > 0 || window.scrollY > 0
+    if (down === scrolledDown.current) return
+    scrolledDown.current = down
+    if (down) setHeld((h) => h ?? calls)
+    else release()
+  }
+  const checkScrollRef = useRef(checkScroll)
+  checkScrollRef.current = checkScroll
+  useEffect(() => {
+    const onScroll = () => checkScrollRef.current()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   // Announce each incident once, when it arrives.
   useEffect(() => {
@@ -306,7 +340,10 @@ export function Feed({
       <div
         ref={scrollRef}
         className="feed-scroll"
-        onScroll={virtual ? (e) => setScrollTop(e.currentTarget.scrollTop) : undefined}
+        onScroll={(e) => {
+          if (virtual) setScrollTop(e.currentTarget.scrollTop)
+          checkScroll()
+        }}
         onPointerEnter={() => {
           pointerInside.current = true
           setHeld((h) => h ?? calls)

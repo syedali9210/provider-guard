@@ -67,6 +67,18 @@ for (const width of [1280, 1024, 800, 375]) {
   })
 }
 
+for (const width of [1280, 800]) {
+  test(`at ${width}px the controls stay in the top bar, with no Options button`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 800 })
+    await page.goto('/')
+    await expect(page.getByRole('button', { name: 'Restart Replay' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'How It Works' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Open Options' })).toBeHidden()
+  })
+}
+
 test('Providers fits a 375px phone without scrolling sideways', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 800 })
   await page.goto('/')
@@ -113,6 +125,92 @@ test.describe('a first visit', () => {
       await expect(intro.getByText(`${step} of 5`)).toBeVisible()
       const overflow = await intro.evaluate((el) => el.scrollWidth - el.clientWidth)
       expect(overflow).toBeLessThanOrEqual(0)
+      if (step < 5) await intro.getByRole('button', { name: 'Next' }).click()
+    }
+  })
+})
+
+// An iPhone-sized screen (390 wide, 664 tall once the browser's own bars are drawn).
+const phone = { viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true }
+
+test.describe('on a phone', () => {
+  test.use(phone)
+
+  test('the Feed scrolls with the page under a one-row top bar that stays in view', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await expect(page.locator('tr.feed-row', { hasText: 'Caught' }).first()).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Open Options' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Restart Replay' })).toBeHidden()
+    const layout = await page.evaluate(() => {
+      const list = document.querySelector('.feed-scroll') as HTMLElement
+      return {
+        topbar: document.querySelector('.topbar')?.getBoundingClientRect().height ?? 0,
+        pageScrolls: document.documentElement.scrollHeight > innerHeight,
+        listScrolls: list.scrollHeight > list.clientHeight + 1,
+      }
+    })
+    expect(layout.topbar).toBeLessThanOrEqual(110)
+    expect(layout.pageScrolls).toBe(true)
+    expect(layout.listScrolls).toBe(false)
+
+    // A caught call fits the row height: the result drops "Caught", which the red flag says.
+    const heights = await page
+      .locator('tr.feed-row')
+      .evaluateAll((rows) => rows.map((r) => r.getBoundingClientRect().height))
+    expect(Math.max(...heights)).toBeLessThanOrEqual(44)
+
+    await page.evaluate(() => window.scrollTo(0, 1500))
+    await expect(page.getByRole('tab', { name: 'Providers' })).toBeInViewport()
+  })
+
+  test('Options is a bottom drawer with the controls; a tap outside closes it', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Open Options' }).click()
+    const options = page.getByRole('dialog', { name: 'Options' })
+    await expect(options.getByRole('button', { name: 'Restart Replay' })).toBeVisible()
+    await expect(options.getByRole('combobox', { name: 'Time range' })).toBeVisible()
+    const box = await options.boundingBox()
+    expect(Math.round((box?.y ?? 0) + (box?.height ?? 0))).toBe(664)
+    // The page behind does not scroll while a drawer is open.
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).overflow)).toBe(
+      'hidden',
+    )
+    await page.mouse.click(195, 20)
+    await expect(options).toBeHidden()
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).overflow)).not.toBe(
+      'hidden',
+    )
+  })
+
+  test('a drawer closes when its handle is swiped down', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Open Options' }).click()
+    const options = page.getByRole('dialog', { name: 'Options' })
+    const handle = await options.locator('.sheet-handle').boundingBox()
+    if (!handle) throw new Error('no handle')
+    const x = handle.x + handle.width / 2
+    await page.mouse.move(x, handle.y + handle.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(x, handle.y + 200, { steps: 8 })
+    await page.mouse.up()
+    await expect(options).toBeHidden()
+  })
+})
+
+test.describe('a first visit on a phone', () => {
+  test.use({ ...phone, storageState: { cookies: [], origins: [] } })
+
+  test('How It Works fits its drawer without scrolling, at every step', async ({ page }) => {
+    await page.goto('/')
+    const intro = page.getByRole('dialog', { name: 'How It Works' })
+    for (let step = 1; step <= 5; step++) {
+      await expect(intro.getByText(`${step} of 5`)).toBeVisible()
+      const extra = await intro.evaluate((el) => el.scrollHeight - el.clientHeight)
+      expect(extra, `step ${step} scrolls`).toBeLessThanOrEqual(0)
       if (step < 5) await intro.getByRole('button', { name: 'Next' }).click()
     }
   })

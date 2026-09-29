@@ -5,6 +5,7 @@ import {
   cloneElement,
   type ReactElement,
   type ReactNode,
+  type PointerEvent as ReactPointerEvent,
   useEffect,
   useId,
   useRef,
@@ -99,6 +100,11 @@ export const IconChevronDown = (p: IconProps) => (
 export const IconList = (p: IconProps) => (
   <Svg {...p}>
     <path d="M5.5 4h8M5.5 8h8M5.5 12h8M2.5 4h.01M2.5 8h.01M2.5 12h.01" />
+  </Svg>
+)
+export const IconMenu = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M2 4.5h12M2 8h12M2 11.5h12" />
   </Svg>
 )
 
@@ -276,10 +282,15 @@ export function Tooltip({
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
+/** How far a drawer must be dragged down before letting go closes it. */
+const SWIPE_CLOSE_PX = 80
+
 /**
  * Geist Sheet: a side panel for detail context. Slides from the right on desktop and from the
  * bottom on small screens. Traps focus, closes on Escape, and has an explicit Close button (in
- * its children). Outside clicks do not close it. The caller returns focus to the trigger.
+ * its children). The caller returns focus to the trigger. On desktop, outside clicks do not close
+ * it. On small screens it is a Geist Drawer: the page behind is dimmed and does not scroll, and a
+ * tap outside or a swipe down on the handle closes it.
  */
 export function Sheet({
   open,
@@ -295,6 +306,14 @@ export function Sheet({
   const ref = useRef<HTMLDivElement>(null)
   const closeRef = useRef(onClose)
   closeRef.current = onClose
+  const drag = useRef<{ start: number; dy: number } | null>(null)
+
+  useEffect(() => {
+    if (!open) return
+    // Only takes effect on small screens (app.css): the page behind a drawer must not scroll.
+    document.documentElement.classList.add('sheet-open')
+    return () => document.documentElement.classList.remove('sheet-open')
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -328,17 +347,46 @@ export function Sheet({
   }, [open])
 
   if (!open) return null
+
+  const moveDrag = (e: ReactPointerEvent) => {
+    if (!drag.current || !ref.current) return
+    drag.current.dy = Math.max(0, e.clientY - drag.current.start)
+    ref.current.style.transform = `translateY(${drag.current.dy}px)`
+  }
+  const endDrag = () => {
+    const dy = drag.current?.dy ?? 0
+    drag.current = null
+    if (ref.current) ref.current.style.transform = ''
+    if (dy > SWIPE_CLOSE_PX) closeRef.current()
+  }
+
   return (
-    <div
-      ref={ref}
-      role="dialog"
-      aria-modal="false"
-      aria-labelledby={labelledBy}
-      className="sheet material-modal"
-      tabIndex={-1}
-    >
-      {children}
-    </div>
+    <>
+      {/* Small screens only: dims the page, and a tap on it closes the drawer. */}
+      <div className="sheet-scrim" aria-hidden="true" onClick={() => closeRef.current()} />
+      <div
+        ref={ref}
+        role="dialog"
+        aria-modal="false"
+        aria-labelledby={labelledBy}
+        className="sheet material-modal"
+        tabIndex={-1}
+      >
+        {/* Small screens only. Pointer users drag it down; everyone else has Close and Escape. */}
+        <div
+          className="sheet-handle"
+          aria-hidden="true"
+          onPointerDown={(e) => {
+            drag.current = { start: e.clientY, dy: 0 }
+            e.currentTarget.setPointerCapture(e.pointerId)
+          }}
+          onPointerMove={moveDrag}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+        />
+        {children}
+      </div>
+    </>
   )
 }
 

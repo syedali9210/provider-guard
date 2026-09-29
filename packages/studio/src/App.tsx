@@ -10,8 +10,10 @@ import {
   EmptyState,
   IconInfo,
   IconList,
+  IconMenu,
   IconRestart,
   IconWarning,
+  IconX,
   Select,
   Sheet,
   Switch,
@@ -111,6 +113,7 @@ export function Studio({
   const [theme, setTheme] = useTheme()
   const [openId, setOpenId] = useState<string | null>(null)
   const [introOpen, setIntroOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [model, setModel] = useState<string | null>(null)
   const now = useNow(5_000)
   const lastTrigger = useRef<string | null>(null)
@@ -145,13 +148,28 @@ export function Studio({
 
   const openIntro = useCallback(() => {
     setOpenId(null)
+    setMenuOpen(false)
     setIntroOpen(true)
   }, [])
   const closeIntro = useCallback(() => {
     setIntroOpen(false)
     markIntroSeen()
-    // Focus lands on the button that reopens it, so it is easy to find again.
-    document.querySelector<HTMLElement>('[data-intro-trigger]')?.focus()
+    // Focus lands on the button that reopens it, so it is easy to find again. On a phone that
+    // button is inside Options, so focus goes to the Options button.
+    const trigger = document.querySelector<HTMLElement>('[data-intro-trigger]')
+    const shown = trigger && getComputedStyle(trigger).display !== 'none'
+    ;(shown ? trigger : document.querySelector<HTMLElement>('[data-menu-trigger]'))?.focus()
+  }, [])
+
+  // Phones: the controls live in an Options drawer (Geist: on mobile, navigation becomes a menu).
+  const openMenu = useCallback(() => {
+    setOpenId(null)
+    setIntroOpen(false)
+    setMenuOpen(true)
+  }, [])
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false)
+    document.querySelector<HTMLElement>('[data-menu-trigger]')?.focus()
   }, [])
 
   // One panel at a time: opening a call closes How It Works.
@@ -174,6 +192,23 @@ export function Studio({
   }, [])
 
   const replay = source.replay
+  // The same controls sit in the top bar on wider screens and in Options on phones.
+  const speed = replay && (
+    <Switch
+      label="Replay speed"
+      value={String(replay.speed) as '1' | '4'}
+      options={[
+        { value: '1', label: '1x' },
+        { value: '4', label: '4x' },
+      ]}
+      onChange={(v) => replay.setSpeed(v === '4' ? 4 : 1)}
+    />
+  )
+  const rangeSelect = (
+    <Select label="Time range" value={range} options={RANGE_OPTIONS} onChange={onRangeChange} />
+  )
+  const themeSwitcher = <ThemeSwitcher value={theme} onChange={setTheme} />
+
   return (
     <div className="app">
       {replay && (
@@ -207,34 +242,38 @@ export function Studio({
             {source.label}
           </Badge>
           {replay && (
-            <Button prefix={<IconInfo />} onClick={openIntro} data-intro-trigger>
+            <Button
+              className="topbar-intro"
+              prefix={<IconInfo />}
+              onClick={openIntro}
+              data-intro-trigger
+            >
               How It Works
             </Button>
           )}
           <div className="topbar-spacer" />
-          {replay && (
-            <div className="replay-controls">
-              <Switch
-                label="Replay speed"
-                value={String(replay.speed) as '1' | '4'}
-                options={[
-                  { value: '1', label: '1x' },
-                  { value: '4', label: '4x' },
-                ]}
-                onChange={(v) => replay.setSpeed(v === '4' ? 4 : 1)}
-              />
-              <Button prefix={<IconRestart />} onClick={replay.restart}>
-                Restart Replay
-              </Button>
-            </div>
-          )}
-          <Select
-            label="Time range"
-            value={range}
-            options={RANGE_OPTIONS}
-            onChange={onRangeChange}
-          />
-          <ThemeSwitcher value={theme} onChange={setTheme} />
+          <div className="topbar-controls">
+            {replay && (
+              <div className="replay-controls">
+                {speed}
+                <Button prefix={<IconRestart />} onClick={replay.restart}>
+                  Restart Replay
+                </Button>
+              </div>
+            )}
+            {rangeSelect}
+            {themeSwitcher}
+          </div>
+          <Button
+            className="topbar-menu"
+            svgOnly
+            variant="tertiary"
+            aria-label="Open Options"
+            onClick={openMenu}
+            data-menu-trigger
+          >
+            <IconMenu />
+          </Button>
         </div>
         <Tabs
           label="Sections"
@@ -283,6 +322,58 @@ export function Studio({
       </Sheet>
       <Sheet open={introOpen} onClose={closeIntro} labelledBy="intro-title">
         <Intro sample={sample} onClose={closeIntro} />
+      </Sheet>
+      <Sheet open={menuOpen} onClose={closeMenu} labelledBy="options-title">
+        <div className="options">
+          <header className="options-header">
+            <h2 id="options-title" className="text-heading-20">
+              Options
+            </h2>
+            <Button
+              svgOnly
+              variant="tertiary"
+              aria-label="Close"
+              onClick={closeMenu}
+              data-autofocus
+            >
+              <IconX />
+            </Button>
+          </header>
+          {/* Each control keeps its own accessible name; the visible labels are for sight. */}
+          <div className="options-body">
+            {replay && (
+              <Button className="options-wide" prefix={<IconInfo />} onClick={openIntro}>
+                How It Works
+              </Button>
+            )}
+            {replay && (
+              <div className="option-row">
+                <span aria-hidden="true">Replay speed</span>
+                {speed}
+              </div>
+            )}
+            <div className="option-row">
+              <span aria-hidden="true">Time range</span>
+              {rangeSelect}
+            </div>
+            <div className="option-row">
+              <span aria-hidden="true">Theme</span>
+              {themeSwitcher}
+            </div>
+            {replay && (
+              <Button
+                className="options-wide"
+                prefix={<IconRestart />}
+                onClick={() => {
+                  replay.restart()
+                  closeMenu()
+                }}
+              >
+                Restart Replay
+              </Button>
+            )}
+          </div>
+        </div>
       </Sheet>
     </div>
   )
