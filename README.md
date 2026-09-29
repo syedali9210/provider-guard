@@ -199,7 +199,7 @@ Pass any sink as `guard({ sink })`: `fileSink(path)` from `provider-guard/node`,
 
 - **Metadata only.** Records and Studio contain model and provider names, finish reasons, token counts, character counts, and stream part types with timings. They never contain prompts, responses, reasoning text, or tool arguments.
 - **Local and read-only.** Studio binds to `127.0.0.1`, serves only the records file and its own assets, and refuses requests for any other host name.
-- **No telemetry.** provider-guard sends nothing anywhere. Its only network request is to the public AI Gateway endpoints API, from `exclude()` or when a retry needs the model's provider list. Adoption is measured only by npm downloads and GitHub activity.
+- **No telemetry.** provider-guard sends nothing anywhere. Its only network request is to the public AI Gateway endpoints API, from `exclude()` or when a retry needs the model's provider list. Adoption is measured only by npm downloads and GitHub activity. The public demo site alone uses Vercel Web Analytics and Speed Insights; that code is left out of every other build, including the Studio in the package.
 
 ## Limitations
 

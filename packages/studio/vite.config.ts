@@ -42,6 +42,11 @@ function linkPreview(): Plugin {
 
 export default defineConfig(({ mode }) => ({
   plugins: [react(), mode === 'replay' && linkPreview()],
+  define: {
+    // Vercel Web Analytics and Speed Insights load only in the public demo: a replay build made on
+    // Vercel. Everywhere else, including the Studio in the npm package, the code is removed.
+    __VERCEL_INSIGHTS__: JSON.stringify(mode === 'replay' && process.env.VERCEL === '1'),
+  },
   resolve: {
     alias: {
       // Pure report/stat helpers and record types are shared with the CLI, straight from source.

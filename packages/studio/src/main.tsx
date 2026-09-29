@@ -9,3 +9,6 @@ createRoot(document.getElementById('root') as HTMLElement).render(
     <App />
   </StrictMode>,
 )
+
+// The public demo only; this branch and the module are removed from every other build.
+if (__VERCEL_INSIGHTS__) void import('./insights').then((m) => m.startInsights())

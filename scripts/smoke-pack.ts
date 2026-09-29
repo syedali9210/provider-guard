@@ -43,6 +43,16 @@ try {
     const code = readFileSync(join(app, 'node_modules', 'provider-guard', 'dist', file), 'utf8')
     if (/^import\s|require\(/m.test(code)) throw new Error(`dist/${file} imports a module`)
   }
+
+  // No telemetry in the package: only the public demo, built on Vercel, loads Vercel Web
+  // Analytics and Speed Insights (packages/studio/src/insights.ts).
+  const assets = join(app, 'node_modules', 'provider-guard', 'dist', 'studio', 'assets')
+  for (const file of readdirSync(assets)) {
+    const code = readFileSync(join(assets, file), 'utf8')
+    if (/_vercel\/(insights|speed-insights)|vercel-scripts\.com/.test(code)) {
+      throw new Error(`dist/studio/assets/${file} contains Vercel analytics`)
+    }
+  }
   console.log(`smoke ok: provider-guard@${version}`)
 } finally {
   rmSync(tmp, { recursive: true, force: true })
