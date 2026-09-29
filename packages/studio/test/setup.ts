@@ -24,6 +24,7 @@ Object.defineProperty(window, 'matchMedia', {
 })
 
 afterEach(() => {
+  vi.useRealTimers()
   cleanup()
   media.reducedMotion = false
   media.dark = false

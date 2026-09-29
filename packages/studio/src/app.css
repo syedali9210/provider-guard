@@ -919,13 +919,15 @@ code {
 .anatomy {
   display: grid;
 }
-.anatomy-header {
+.anatomy-header,
+.intro-header {
   display: grid;
   gap: 8px;
   padding: 20px 24px;
   box-shadow: inset 0 -1px var(--ds-gray-alpha-400);
 }
-.anatomy-title-row {
+.anatomy-title-row,
+.intro-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1288,4 +1290,176 @@ code {
   .effort-flag {
     white-space: normal;
   }
+}
+
+/* ---------------------------------------------------------------------------- how it works */
+
+/* Fills the side sheet, so the footer sits at its bottom edge. */
+.intro {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100%;
+}
+.intro-subtitle,
+.intro-note,
+.intro-count,
+.intro-legend dd {
+  color: var(--ds-gray-900);
+}
+.intro-step {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  padding: 20px 24px;
+}
+.intro-step p {
+  margin: 0;
+}
+.intro-footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--ds-background-200);
+  box-shadow: inset 0 1px var(--ds-gray-alpha-400);
+}
+.intro-count {
+  margin-right: auto;
+}
+
+/* Flow diagrams. The call is a dot that travels between nodes; labels fade in as it arrives. */
+.flow {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+.flow-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.flow-replay {
+  justify-self: end;
+}
+.flow-lines line {
+  stroke: var(--ds-gray-alpha-400);
+  stroke-width: 1.5;
+}
+.flow-node rect {
+  fill: var(--ds-background-100);
+  stroke: var(--ds-gray-alpha-600);
+}
+.flow-node text {
+  fill: var(--ds-gray-1000);
+  font: var(--font-weight-medium) 13px var(--font-geist-sans);
+  text-anchor: middle;
+}
+.flow-node-guard rect {
+  stroke: var(--ds-blue-700);
+}
+.flow-node-guard text,
+.flow-chip text {
+  font: 12px var(--font-mono);
+}
+.flow-chip rect {
+  fill: var(--ds-gray-100);
+  stroke: var(--ds-gray-alpha-400);
+}
+.flow-chip text {
+  fill: var(--ds-gray-1000);
+  text-anchor: middle;
+}
+.flow-chip-flagged rect {
+  fill: var(--ds-red-100);
+  stroke: var(--ds-red-400);
+}
+.flow-chip-flagged text {
+  fill: var(--ds-red-900);
+}
+.flow-flag path {
+  fill: none;
+  stroke: var(--ds-red-900);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.flow-packet {
+  transition:
+    transform 450ms ease-in-out,
+    fill 150ms ease-out;
+}
+.flow-request {
+  fill: var(--ds-blue-700);
+}
+.flow-answer {
+  fill: var(--ds-green-700);
+}
+.flow-error {
+  fill: var(--ds-red-700);
+}
+.flow-empty {
+  fill: var(--ds-background-100);
+  stroke: var(--ds-amber-700);
+  stroke-width: 2;
+}
+.flow-mark {
+  font: var(--font-weight-medium) 12px var(--font-geist-sans);
+  text-anchor: middle;
+  animation: flow-mark 200ms ease-out both;
+}
+.flow-mark-ok {
+  fill: var(--ds-green-900);
+}
+.flow-mark-bad {
+  fill: var(--ds-red-900);
+}
+.flow-mark-neutral {
+  fill: var(--ds-gray-900);
+}
+@keyframes flow-mark {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flow-packet {
+    transition: none;
+  }
+  .flow-mark {
+    animation: none;
+  }
+}
+
+/* Reading This Screen: a real caught call, drawn with the Feed's own chips and result. */
+.intro-sample {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: var(--ds-shadow-border);
+}
+.intro-legend {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+.intro-legend dt {
+  font-weight: var(--font-weight-medium);
+}
+.intro-legend dd {
+  margin: 0;
+}
+.intro-points {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
 }

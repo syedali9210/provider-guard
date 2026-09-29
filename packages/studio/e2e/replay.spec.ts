@@ -83,3 +83,37 @@ test('Providers fits a 375px phone without scrolling sideways', async ({ page })
     expect(overflow).toBeLessThanOrEqual(0)
   }
 })
+
+test.describe('a first visit', () => {
+  test.use({ storageState: { cookies: [], origins: [] } })
+
+  test('How It Works explains the gap beside the replay, then stays closed', async ({ page }) => {
+    await page.goto('/')
+    const intro = page.getByRole('dialog', { name: 'How It Works' })
+    await expect(intro.getByRole('heading', { name: 'One Model, Many Providers' })).toBeVisible()
+    // The replay plays beside it, so the first catch shows while the story is told.
+    await expect(page.locator('tr.feed-row.catching')).toHaveCount(1, { timeout: 15_000 })
+
+    for (let i = 0; i < 4; i++) await intro.getByRole('button', { name: 'Next' }).click()
+    await expect(intro.getByText(/Caught → recovered on/)).toBeVisible()
+    await intro.getByRole('button', { name: 'Done' }).click()
+    await expect(intro).toBeHidden()
+    await expect(page.getByRole('button', { name: 'How It Works' })).toBeFocused()
+
+    await page.reload()
+    await expect(page.locator('tr.feed-row').first()).toBeVisible()
+    await expect(intro).toBeHidden()
+  })
+
+  test('How It Works fits a 375px phone at every step', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 })
+    await page.goto('/')
+    const intro = page.getByRole('dialog', { name: 'How It Works' })
+    for (let step = 1; step <= 5; step++) {
+      await expect(intro.getByText(`${step} of 5`)).toBeVisible()
+      const overflow = await intro.evaluate((el) => el.scrollWidth - el.clientWidth)
+      expect(overflow).toBeLessThanOrEqual(0)
+      if (step < 5) await intro.getByRole('button', { name: 'Next' }).click()
+    }
+  })
+})

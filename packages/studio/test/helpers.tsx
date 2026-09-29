@@ -28,15 +28,13 @@ export function makeSource(records: CallRecord[], overrides: Partial<Source> = {
   }
 }
 
-export function renderStudio(source: Source, range: Range = 'all') {
+export function renderStudio(source: Source, range: Range = 'all', { autoIntro = false } = {}) {
   const onRangeChange = vi.fn()
-  const utils = render(<Studio source={source} range={range} onRangeChange={onRangeChange} />)
-  return {
-    ...utils,
-    onRangeChange,
-    rerenderWith: (next: Source) =>
-      utils.rerender(<Studio source={next} range={range} onRangeChange={onRangeChange} />),
-  }
+  const studio = (s: Source) => (
+    <Studio source={s} range={range} onRangeChange={onRangeChange} autoIntro={autoIntro} />
+  )
+  const utils = render(studio(source))
+  return { ...utils, onRangeChange, rerenderWith: (next: Source) => utils.rerender(studio(next)) }
 }
 
 let seq = 0

@@ -158,7 +158,7 @@ openai/gpt-5.6-sol                            12 attempts · 0 caught
 
 ![Reasoning by effort level, with Bedrock ignoring effort](https://raw.githubusercontent.com/syedali9210/provider-guard/main/docs/studio-reasoning.png)
 
-The public demo at **https://provider-guard-demo.vercel.app** plays the published issue data. To replay it locally without any records of your own:
+The public demo at **https://provider-guard-demo.vercel.app** plays the published issue data. On a first visit it opens How It Works: five short animated steps on why provider-guard exists and how to read the screen. To replay it locally without any records of your own:
 
 ```bash
 npx provider-guard studio --replay all

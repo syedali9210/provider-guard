@@ -79,7 +79,9 @@ export type Source = {
 
 type Config = { mode: 'live'; file: string } | { mode: 'replay'; dataset: string }
 
-const replayBuild = import.meta.env.VITE_MODE === 'replay' || import.meta.env.MODE === 'replay'
+/** The public demo build: `vite build --mode replay`. */
+export const replayBuild =
+  import.meta.env.VITE_MODE === 'replay' || import.meta.env.MODE === 'replay'
 
 export function useSource(range: Range): Source {
   const [config, setConfig] = useState<Config | null>(

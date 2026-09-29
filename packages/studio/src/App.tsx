@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CallAnatomy } from './Anatomy'
-import { type Call, RANGES, type Range, type Source, toCalls, useSource } from './data'
+import { type Call, RANGES, type Range, replayBuild, type Source, toCalls, useSource } from './data'
 import { Feed } from './Feed'
+import { Intro } from './Intro'
 import { Providers } from './Providers'
 import {
   Badge,
@@ -22,6 +23,21 @@ import {
 
 type Tab = 'feed' | 'providers'
 const THEME_KEY = 'provider-guard-theme'
+const INTRO_KEY = 'provider-guard-intro-seen'
+
+function introSeen(): boolean {
+  try {
+    return localStorage.getItem(INTRO_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function markIntroSeen() {
+  try {
+    localStorage.setItem(INTRO_KEY, '1')
+  } catch {}
+}
 
 const RANGE_OPTIONS: Array<{ value: Range; label: string }> = [
   { value: '15m', label: 'Last 15 minutes' },
@@ -76,21 +92,25 @@ function useTab(): [Tab, (t: Tab) => void] {
 export function App() {
   const [range, setRange] = useState<Range>('all')
   const source = useSource(range)
-  return <Studio source={source} range={range} onRangeChange={setRange} />
+  return <Studio source={source} range={range} onRangeChange={setRange} autoIntro={replayBuild} />
 }
 
 export function Studio({
   source,
   range,
   onRangeChange,
+  autoIntro = false,
 }: {
   source: Source
   range: Range
   onRangeChange: (range: Range) => void
+  /** Open How It Works on a first visit: the public demo, where newcomers land. */
+  autoIntro?: boolean
 }) {
   const [tab, setTab] = useTab()
   const [theme, setTheme] = useTheme()
   const [openId, setOpenId] = useState<string | null>(null)
+  const [introOpen, setIntroOpen] = useState(false)
   const [model, setModel] = useState<string | null>(null)
   const now = useNow(5_000)
   const lastTrigger = useRef<string | null>(null)
@@ -107,10 +127,45 @@ export function Studio({
   )
   const open = openId === null ? null : (allCalls.find((c) => c.id === openId) ?? null)
 
-  const openCall = useCallback((call: Call) => {
-    lastTrigger.current = call.id
-    setOpenId(call.id)
+  // A real caught call for How It Works to explain, recovered on zai like its diagram when one is.
+  // The oldest one: it stays put as calls arrive, and it appears once the replay loads.
+  const sample = useMemo(() => {
+    const caught = (c: Call) => c.result === 'recovered' && c.first.provider === 'baseten'
+    return (
+      allCalls.findLast((c) => caught(c) && c.second?.provider === 'zai') ??
+      allCalls.findLast(caught) ??
+      null
+    )
+  }, [allCalls])
+
+  const isReplay = source.replay !== null
+  useEffect(() => {
+    if (autoIntro && isReplay && !introSeen()) setIntroOpen(true)
+  }, [autoIntro, isReplay])
+
+  const openIntro = useCallback(() => {
+    setOpenId(null)
+    setIntroOpen(true)
   }, [])
+  const closeIntro = useCallback(() => {
+    setIntroOpen(false)
+    markIntroSeen()
+    // Focus lands on the button that reopens it, so it is easy to find again.
+    document.querySelector<HTMLElement>('[data-intro-trigger]')?.focus()
+  }, [])
+
+  // One panel at a time: opening a call closes How It Works.
+  const openCall = useCallback(
+    (call: Call) => {
+      lastTrigger.current = call.id
+      if (introOpen) {
+        setIntroOpen(false)
+        markIntroSeen()
+      }
+      setOpenId(call.id)
+    },
+    [introOpen],
+  )
   const closeCall = useCallback(() => {
     setOpenId(null)
     // Return focus to the row that opened the sheet, so keyboard users keep their place. The row
@@ -151,6 +206,11 @@ export function Studio({
           <Badge variant={source.mode === 'live' ? 'green' : 'blue'} title={source.label}>
             {source.label}
           </Badge>
+          {replay && (
+            <Button prefix={<IconInfo />} onClick={openIntro} data-intro-trigger>
+              How It Works
+            </Button>
+          )}
           <div className="topbar-spacer" />
           {replay && (
             <div className="replay-controls">
@@ -220,6 +280,9 @@ export function Studio({
       {/* Keyed by call: each opened call starts at the top with focus on Close. */}
       <Sheet key={open?.id} open={open !== null} onClose={closeCall} labelledBy="anatomy-title">
         {open && <CallAnatomy call={open} now={now} onClose={closeCall} />}
+      </Sheet>
+      <Sheet open={introOpen} onClose={closeIntro} labelledBy="intro-title">
+        <Intro sample={sample} onClose={closeIntro} />
       </Sheet>
     </div>
   )
